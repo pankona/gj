@@ -34,5 +34,9 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
     - name: Run tests
       run: make test
