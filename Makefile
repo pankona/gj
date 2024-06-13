@@ -14,3 +14,8 @@ install-tools:
 .PHONY: devserver
 devserver:
 	go run $(CURDIR)/devserver & air -c .air.toml
+
+.PHONY: coverage
+coverage:
+	go test -coverpkg=./... -coverprofile=$(CURDIR)/cover.out ./...
+	go tool cover -html=$(CURDIR)/cover.out -o $(CURDIR)/cover.html
