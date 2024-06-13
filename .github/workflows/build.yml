@@ -26,6 +26,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      DISPLAY: ':99.0'
 
     steps:
     - name: Checkout code
@@ -37,6 +39,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev
+        sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev xvfb
     - name: Run tests
-      run: make test
+      run: |
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        make test
