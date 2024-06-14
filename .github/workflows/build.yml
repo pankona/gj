@@ -43,5 +43,5 @@ jobs:
     - name: Run tests
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        xauth add :99 . $(mcookie)
+        xauth add :99 . trusted
         make test
