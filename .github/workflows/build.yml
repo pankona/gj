@@ -45,5 +45,5 @@ jobs:
         touch ~/.Xauthority
         chmod +w ~/.Xauthority
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-        xauth generate :99 . $(mcookie)
+        xauth add :99 . $(mcookie)
         make test
