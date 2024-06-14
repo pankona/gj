@@ -42,5 +42,6 @@ jobs:
         sudo apt-get install libasound2-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev xvfb
     - name: Run tests
       run: |
+        xauth generate :99 . trusted
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         make test
