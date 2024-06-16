@@ -12,6 +12,7 @@ type Game struct {
 	clickedPositionX, clickedPositionY int
 
 	clickHandler *OnClickHandler
+	drawHandler  *DrawHandler
 
 	circle *Circle
 
@@ -32,6 +33,12 @@ func (g *Game) ZIndex() int {
 }
 
 func (g *Game) Update() error {
+	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
+	// これをやると登録された Clickable の OnClick が呼ばれる
+	if x, y, clicked := getClickedPosition(); clicked {
+		g.clickHandler.HandleClick(x, y)
+	}
+
 	x, y, clicked := getClickedPosition()
 	if clicked {
 		g.clickedPositionX = x
@@ -41,18 +48,12 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
-	// これをやると登録された Clickable の OnClick が呼ばれる
-	if x, y, clicked := getClickedPosition(); clicked {
-		g.clickHandler.HandleClick(x, y)
-	}
+	// クリックされた位置を表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
+	// クリックされたオブジェクトを表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
 
-	ebitenutil.DebugPrint(screen, "Hello, World!")
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%.2d, %.2d)", g.clickedPositionX, g.clickedPositionY), 0, 20)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 40)
-
-	// circle を描画
-	g.circle.Draw(screen)
+	g.drawHandler.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -86,6 +87,9 @@ func main() {
 
 	clickHandler.Add(g)
 	clickHandler.Add(circle)
+
+	g.drawHandler = &DrawHandler{}
+	g.drawHandler.Add(circle)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
