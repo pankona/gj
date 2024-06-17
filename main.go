@@ -57,7 +57,8 @@ func main() {
 	// 最初のシーンをセットアップする
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
-	g.drawHandler.Add(NewHouse(g))
+	g.drawHandler.Add(newHouse(g))
+	g.drawHandler.Add(newReadyButton(g))
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

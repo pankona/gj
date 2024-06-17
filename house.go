@@ -25,7 +25,7 @@ type house struct {
 	scale float64
 }
 
-func NewHouse(game *Game) *house {
+func newHouse(game *Game) *house {
 	img, _, err := image.Decode(bytes.NewReader(houseImageData))
 	if err != nil {
 		log.Fatal(err)
