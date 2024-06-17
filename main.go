@@ -14,22 +14,7 @@ type Game struct {
 	clickHandler *OnClickHandler
 	drawHandler  *DrawHandler
 
-	circle *Circle
-
 	clickedObject string
-}
-
-// Game implements clickable interface
-func (g *Game) OnClick() {
-	g.clickedObject = ""
-}
-
-func (g *Game) IsClicked(x, y int) bool {
-	return true
-}
-
-func (g *Game) ZIndex() int {
-	return 0
 }
 
 func (g *Game) Update() error {
@@ -64,32 +49,15 @@ func main() {
 	ebiten.SetWindowSize(1280, 960)
 	ebiten.SetWindowTitle("Hello, World!")
 
-	g := &Game{}
-
-	// ClickHandler setup
-	clickHandler := &OnClickHandler{}
-
-	circle := &Circle{
-		game: g,
-
-		// 画面中央に配置
-		x: 1280 / 2,
-		y: 960 / 2,
-
-		radius: 50,
-		zindex: 1,
-
-		image: ebiten.NewImage(1, 1),
+	g := &Game{
+		clickHandler: &OnClickHandler{},
+		drawHandler:  &DrawHandler{},
 	}
 
-	g.clickHandler = clickHandler
-	g.circle = circle
-
-	clickHandler.Add(g)
-	clickHandler.Add(circle)
-
-	g.drawHandler = &DrawHandler{}
-	g.drawHandler.Add(circle)
+	// 最初のシーンをセットアップする
+	// とりあえずいきなりゲームが始まるとする。
+	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
+	g.drawHandler.Add(NewHouse(g))
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
