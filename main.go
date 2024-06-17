@@ -60,6 +60,12 @@ func main() {
 	g.drawHandler.Add(newHouse(g))
 	g.drawHandler.Add(newReadyButton(g))
 
+	//とりあえずいったん虫を画面の下部に配置
+	screenWidth, screenHeight := 1280, 960
+	g.drawHandler.Add(newBug(g, bugsRed, screenWidth/2-50, screenHeight-100))
+	g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
+	g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
+
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
