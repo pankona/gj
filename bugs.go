@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -14,19 +15,24 @@ import (
 //go:embed assets/bugs.png
 var bugsImageData []byte
 
+type bugColor int
+
 type bug struct {
 	game          *Game
 	x, y          int
 	width, height int
 	zindex        int
 	image         *ebiten.Image
+	selfColor     bugColor
+
+	speed          float64
+	attackRange    float64
+	attackCooldown int
 
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
 }
-
-type bugColor int
 
 const (
 	bugsRed bugColor = iota
@@ -53,16 +59,19 @@ func newBug(game *Game, bugColor bugColor, x, y int) *bug {
 		log.Fatal("invalid bug color")
 		return image.Rectangle{}
 	}()
-	redBugImage := bugsImage.SubImage(rect).(*ebiten.Image)
+	bugImage := bugsImage.SubImage(rect).(*ebiten.Image)
 
 	return &bug{
-		game:   game,
-		x:      x,
-		y:      y,
-		width:  img.Bounds().Dx(),
-		height: img.Bounds().Dy(),
-		scale:  1,
-		image:  redBugImage,
+		game:        game,
+		x:           x,
+		y:           y,
+		width:       bugImage.Bounds().Dx(),
+		height:      bugImage.Bounds().Dy(),
+		scale:       1,
+		image:       bugImage,
+		selfColor:   bugColor,
+		speed:       5,
+		attackRange: 5,
 	}
 }
 
@@ -78,15 +87,89 @@ func greenBug() image.Rectangle {
 	return image.Rect(35, 50, 66, 96)
 }
 
-// 画面中央に配置
-func (h *bug) Draw(screen *ebiten.Image) {
-	// 画像を描画
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(h.scale, h.scale)
-	opts.GeoM.Translate(float64(h.x), float64(h.y))
-	screen.DrawImage(h.image, opts)
+func (b *bug) Update() {
+	switch b.selfColor {
+	case bugsRed:
+		redBugUpdate(b)
+	case bugsBlue:
+		blueBugUpdate(b)
+	case bugsGreen:
+		greenBugUpdate(b)
+	default:
+		log.Fatal("invalid bug color")
+	}
 }
 
-func (h *bug) ZIndex() int {
-	return h.zindex
+func (b *bug) attack() {
+	// todo: implement
+	b.game.clickedObject = "bug attacking!"
+}
+
+func redBugUpdate(b *bug) {
+	// builds から house を探して target とする
+	var targetX, targetY int
+	var targetWidth, targetHeight int
+
+	for _, building := range b.game.buildings {
+		if building.Name() == "house" {
+			targetX, targetY = building.Position()
+			targetWidth, targetHeight = building.Size()
+			break
+		}
+	}
+
+	// 自分の中心座標を基準に行き先を計算する
+	bx, by := b.x+b.width/2, b.y+b.height/2
+
+	// ターゲットへの直線距離を計算
+	dx := targetX - bx
+	dy := targetY - by
+	distance := math.Sqrt(float64(dx*dx + dy*dy))
+
+	// 攻撃レンジに入っているか確認
+	targetSize := targetWidth
+	if targetWidth > targetHeight {
+		targetSize = targetHeight
+	}
+
+	if distance <= b.attackRange+float64(targetSize)/2 {
+		// クールダウン中でなければ攻撃
+		if b.attackCooldown <= 0 {
+			b.attack()
+			b.attackCooldown = 60
+		} else {
+			// クールダウンを消化する
+			b.attackCooldown -= 1
+		}
+
+		return
+	}
+
+	// 移動方向のラジアンを計算
+	angle := math.Atan2(float64(dy), float64(dx))
+
+	// 移動
+	b.x += int(math.Cos(angle) * b.speed)
+	b.y += int(math.Sin(angle) * b.speed)
+}
+
+func blueBugUpdate(b *bug) {
+	// todo: implement
+}
+
+func greenBugUpdate(b *bug) {
+	// todo: implement
+}
+
+// 画面中央に配置
+func (b *bug) Draw(screen *ebiten.Image) {
+	// 画像を描画
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Scale(b.scale, b.scale)
+	opts.GeoM.Translate(float64(b.x), float64(b.y))
+	screen.DrawImage(b.image, opts)
+}
+
+func (b *bug) ZIndex() int {
+	return b.zindex
 }
