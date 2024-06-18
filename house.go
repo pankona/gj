@@ -16,6 +16,7 @@ var houseImageData []byte
 
 type house struct {
 	game          *Game
+	x, y          int
 	width, height int
 	zindex        int
 	image         *ebiten.Image
@@ -31,31 +32,42 @@ func newHouse(game *Game) *house {
 		log.Fatal(err)
 	}
 
-	return &house{
+	h := &house{
 		game:   game,
 		width:  img.Bounds().Dx(),
 		height: img.Bounds().Dy(),
 		scale:  0.5,
 		image:  ebiten.NewImageFromImage(img),
 	}
+
+	h.x = screenWidth/2 - int(float64(h.width)*h.scale)/2
+	h.y = screenHeight/2 - int(float64(h.height)*h.scale)/2
+
+	return h
 }
 
 // 画面中央に配置
 func (h *house) Draw(screen *ebiten.Image) {
-	// ウィンドウサイズを取得
-	screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
-
-	// 画像を中央に配置するための座標を計算
-	x := (screenWidth - int(float64(h.width)*h.scale)) / 2
-	y := (screenHeight - int(float64(h.height)*h.scale)) / 2
-
 	// 画像を描画
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(h.scale, h.scale)
-	opts.GeoM.Translate(float64(x), float64(y))
+	opts.GeoM.Translate(float64(h.x), float64(h.y))
 	screen.DrawImage(h.image, opts)
 }
 
 func (h *house) ZIndex() int {
 	return h.zindex
+}
+
+func (h *house) Position() (int, int) {
+	// 中央の座標を返す
+	return h.x + int(float64(h.width)*h.scale)/2, h.y + int(float64(h.height)*h.scale)/2
+}
+
+func (h *house) Size() (int, int) {
+	return int(float64(h.width) * h.scale), int(float64(h.height) * h.scale)
+}
+
+func (h *house) Name() string {
+	return "house"
 }
