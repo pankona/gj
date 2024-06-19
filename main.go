@@ -115,7 +115,17 @@ func main() {
 	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 
-	// 建物一覧に登録
+	// バリケードを家のすぐ下に配置
+	barricades := []*barricade{
+		newBarricade(g, screenWidth/2-105, screenHeight/2+80),
+		newBarricade(g, screenWidth/2, screenHeight/2+80),
+		newBarricade(g, screenWidth/2+105, screenHeight/2+80),
+	}
+	for _, barricade := range barricades {
+		g.drawHandler.Add(barricade)
+		g.AddBuilding(barricade)
+	}
+
 	g.AddBuilding(house)
 
 	if err := ebiten.RunGame(g); err != nil {
