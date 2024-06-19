@@ -15,11 +15,14 @@ import (
 var houseImageData []byte
 
 type house struct {
-	game          *Game
-	x, y          int
-	width, height int
-	zindex        int
+	game *Game
+
+	x, y          int // 画面中央に配置するので初期化時に値をもらう必要はない
+	width, height int // 画像サイズをそのまま使うので初期化時に値をもらう必要はない
+	zindex        int // これも適当に調整するので初期化時に値をもらう必要はない
 	image         *ebiten.Image
+
+	health int
 
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
@@ -33,11 +36,15 @@ func newHouse(game *Game) *house {
 	}
 
 	h := &house{
-		game:   game,
+		game: game,
+
 		width:  img.Bounds().Dx(),
 		height: img.Bounds().Dy(),
 		scale:  0.5,
-		image:  ebiten.NewImageFromImage(img),
+
+		health: 100,
+
+		image: ebiten.NewImageFromImage(img),
 	}
 
 	h.x = screenWidth/2 - int(float64(h.width)*h.scale)/2
@@ -70,4 +77,15 @@ func (h *house) Size() (int, int) {
 
 func (h *house) Name() string {
 	return "house"
+}
+
+func (h *house) Damage(d int) {
+	if h.health <= 0 {
+		return
+	}
+
+	h.health -= d
+	if h.health <= 0 {
+		h.health = 0
+	}
 }

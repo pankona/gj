@@ -25,8 +25,12 @@ type bug struct {
 	image         *ebiten.Image
 	selfColor     bugColor
 
-	speed          float64
-	attackRange    float64
+	speed       float64
+	attackPower int
+	attackRange float64
+
+	// 攻撃クールダウン
+	// 初期化時に設定するものではなく、攻撃後に設定するもの
 	attackCooldown int
 
 	// 画像の拡大率。
@@ -62,16 +66,19 @@ func newBug(game *Game, bugColor bugColor, x, y int) *bug {
 	bugImage := bugsImage.SubImage(rect).(*ebiten.Image)
 
 	return &bug{
-		game:        game,
-		x:           x,
-		y:           y,
-		width:       bugImage.Bounds().Dx(),
-		height:      bugImage.Bounds().Dy(),
-		scale:       1,
-		image:       bugImage,
-		selfColor:   bugColor,
+		game:      game,
+		x:         x,
+		y:         y,
+		width:     bugImage.Bounds().Dx(),
+		height:    bugImage.Bounds().Dy(),
+		image:     bugImage,
+		selfColor: bugColor,
+
 		speed:       5,
+		attackPower: 1,
 		attackRange: 5,
+
+		scale: 1,
 	}
 }
 
@@ -100,20 +107,27 @@ func (b *bug) Update() {
 	}
 }
 
-func (b *bug) attack() {
-	// todo: implement
-	b.game.clickedObject = "bug attacking!"
+func (b *bug) attack(a Damager) {
+	a.Damage(b.attackPower)
+}
+
+type Damager interface {
+	Damage(int)
 }
 
 func redBugUpdate(b *bug) {
 	// builds から house を探して target とする
-	var targetX, targetY int
-	var targetWidth, targetHeight int
+	var (
+		targetX, targetY          int
+		targetWidth, targetHeight int
+		target                    Damager
+	)
 
 	for _, building := range b.game.buildings {
 		if building.Name() == "house" {
 			targetX, targetY = building.Position()
 			targetWidth, targetHeight = building.Size()
+			target = building.(*house)
 			break
 		}
 	}
@@ -135,7 +149,7 @@ func redBugUpdate(b *bug) {
 	if distance <= b.attackRange+float64(targetSize)/2 {
 		// クールダウン中でなければ攻撃
 		if b.attackCooldown <= 0 {
-			b.attack()
+			b.attack(target)
 			b.attackCooldown = 60
 		} else {
 			// クールダウンを消化する
