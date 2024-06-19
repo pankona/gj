@@ -60,6 +60,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 画面中央に点を表示 (debug)
 	vector.DrawFilledRect(screen, screenWidth/2, screenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
+	// house の HP を表示
+	for _, building := range g.buildings {
+		if building.Name() == "house" {
+			h := building.(*house)
+			ebitenutil.DebugPrintAt(screen, fmt.Sprintf("House HP: %d", h.health), 0, 40)
+		}
+	}
+
 	g.drawHandler.Draw(screen)
 }
 
