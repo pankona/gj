@@ -71,17 +71,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawHandler.Draw(screen)
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 1280, 960
-}
-
 const (
 	screenWidth  = 1280
 	screenHeight = 960
 )
 
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return screenWidth, screenHeight
+}
+
 func main() {
-	ebiten.SetWindowSize(1280, 960)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 
 	g := &Game{
@@ -128,7 +128,40 @@ func main() {
 
 	g.AddBuilding(house)
 
+	g.drawHandler.Add(newInfoPanel(screenWidth-20, screenHeight/7))
+
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// パネルの枠を表示するための構造体
+type infoPanel struct {
+	x, y          int
+	width, height int
+	zindex        int
+}
+
+func newInfoPanel(w, h int) *infoPanel {
+	bottomMargin := 10
+	return &infoPanel{
+		x:      screenWidth/2 - w/2,
+		y:      screenHeight - h - bottomMargin,
+		width:  w,
+		height: h,
+		zindex: 10,
+	}
+}
+
+func (p *infoPanel) Draw(screen *ebiten.Image) {
+	// 枠を描画
+	strokeWidth := float32(2)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x+p.width), float32(p.y), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x), float32(p.y+p.height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x+p.width), float32(p.y), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y+p.height), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
+}
+
+func (p *infoPanel) ZIndex() int {
+	return p.zindex
 }
