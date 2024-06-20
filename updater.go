@@ -12,7 +12,7 @@ func (u *UpdateHandler) Add(updater Updater) {
 	u.updaters = append(u.updaters, updater)
 }
 
-func (u *UpdateHandler) Update() {
+func (u *UpdateHandler) HandleUpdate() {
 	for _, updater := range u.updaters {
 		updater.Update()
 	}

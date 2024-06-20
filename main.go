@@ -41,7 +41,7 @@ func (g *Game) Update() error {
 	}
 
 	// Updater を実行
-	g.updateHandler.Update()
+	g.updateHandler.HandleUpdate()
 
 	x, y, clicked := getClickedPosition()
 	if clicked {
@@ -68,7 +68,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	g.drawHandler.Draw(screen)
+	g.drawHandler.HandleDraw(screen)
 }
 
 const (
@@ -118,6 +118,7 @@ func main() {
 	for _, redBug := range redBugs {
 		g.drawHandler.Add(redBug)
 		g.updateHandler.Add(redBug)
+		g.clickHandler.Add(redBug)
 	}
 
 	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
@@ -132,11 +133,14 @@ func main() {
 	for _, barricade := range barricades {
 		g.drawHandler.Add(barricade)
 		g.AddBuilding(barricade)
+		g.clickHandler.Add(barricade)
 	}
 
 	g.AddBuilding(house)
 
 	g.drawHandler.Add(newInfoPanel(screenWidth-20, infoPanelHeight))
+
+	g.clickHandler.Add(house)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

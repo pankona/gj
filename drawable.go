@@ -36,7 +36,7 @@ func (o *DrawHandler) Remove(obj Drawable) {
 	}
 }
 
-func (o *DrawHandler) Draw(screen *ebiten.Image) {
+func (o *DrawHandler) HandleDraw(screen *ebiten.Image) {
 	for _, obj := range o.drawable {
 		obj.Draw(screen)
 	}

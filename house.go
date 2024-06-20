@@ -89,3 +89,13 @@ func (h *house) Damage(d int) {
 		h.health = 0
 	}
 }
+
+// house implements Clickable interface
+func (h *house) OnClick() {
+	h.game.clickedObject = "house"
+}
+
+func (h *house) IsClicked(x, y int) bool {
+	width, height := h.Size()
+	return h.x-width/2 <= x && x <= h.x+width/2 && h.y-height/2 <= y && y <= h.y+height/2
+}

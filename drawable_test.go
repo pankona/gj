@@ -70,7 +70,7 @@ func TestDrawHandlerDraw(t *testing.T) {
 	handler.Add(obj1)
 	handler.Add(obj2)
 
-	handler.Draw(screen)
+	handler.HandleDraw(screen)
 
 	// Check if both objects were drawn
 	if !obj1.drawn || !obj2.drawn {

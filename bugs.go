@@ -202,10 +202,28 @@ func (b *bug) Draw(screen *ebiten.Image) {
 	// 画像を描画
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(b.scale, b.scale)
-	opts.GeoM.Translate(float64(b.x), float64(b.y))
+	opts.GeoM.Translate(float64(b.x)-float64(b.width)*b.scale/2, float64(b.y)-float64(b.height)*b.scale/2)
 	screen.DrawImage(b.image, opts)
 }
 
 func (b *bug) ZIndex() int {
 	return b.zindex
+}
+
+func (b *bug) OnClick() {
+	switch b.selfColor {
+	case bugsRed:
+		b.game.clickedObject = "red bug"
+	case bugsBlue:
+		b.game.clickedObject = "blue bug"
+	case bugsGreen:
+		b.game.clickedObject = "green bug"
+	default:
+		log.Fatal("invalid bug color")
+	}
+}
+
+func (b *bug) IsClicked(x, y int) bool {
+	width, height := b.width, b.height
+	return b.x-width/2 <= x && x <= b.x+width/2 && b.y-height/2 <= y && y <= b.y+height/2
 }
