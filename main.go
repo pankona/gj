@@ -20,6 +20,8 @@ type Game struct {
 	// 建物のリスト
 	buildings []Building
 
+	infoPanel *infoPanel
+
 	clickedObject string
 }
 
@@ -41,7 +43,7 @@ func (g *Game) Update() error {
 	}
 
 	// Updater を実行
-	g.updateHandler.Update()
+	g.updateHandler.HandleUpdate()
 
 	x, y, clicked := getClickedPosition()
 	if clicked {
@@ -58,7 +60,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
 
 	// 画面中央に点を表示 (debug)
-	vector.DrawFilledRect(screen, screenWidth/2, screenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
 	// house の HP を表示
 	for _, building := range g.buildings {
@@ -68,11 +70,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	g.drawHandler.Draw(screen)
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 1280, 960
+	g.drawHandler.HandleDraw(screen)
 }
 
 const (
@@ -80,8 +78,20 @@ const (
 	screenHeight = 960
 )
 
+const (
+	// infoPanel の高さを計算
+	// infoPanel の高さの分だけ、ゲーム画面の中央座標が上にずれる
+	// 中央座標計算のためにあらかじめここで計算しておく
+	infoPanelHeight = screenHeight / 7
+	eScreenHeight   = screenHeight - infoPanelHeight - 10
+)
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return screenWidth, screenHeight
+}
+
 func main() {
-	ebiten.SetWindowSize(1280, 960)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 
 	g := &Game{
@@ -99,17 +109,18 @@ func main() {
 
 	//とりあえずいったん虫を画面の下部に配置
 	redBugs := []*bug{
-		newBug(g, bugsRed, screenWidth/2-50, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-30, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-10, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+10, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+30, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+50, screenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100),
 	}
 
 	for _, redBug := range redBugs {
 		g.drawHandler.Add(redBug)
 		g.updateHandler.Add(redBug)
+		g.clickHandler.Add(redBug)
 	}
 
 	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
@@ -117,18 +128,71 @@ func main() {
 
 	// バリケードを家のすぐ下に配置
 	barricades := []*barricade{
-		newBarricade(g, screenWidth/2-105, screenHeight/2+80),
-		newBarricade(g, screenWidth/2, screenHeight/2+80),
-		newBarricade(g, screenWidth/2+105, screenHeight/2+80),
+		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80),
+		newBarricade(g, screenWidth/2, eScreenHeight/2+80),
+		newBarricade(g, screenWidth/2+105, eScreenHeight/2+80),
 	}
 	for _, barricade := range barricades {
 		g.drawHandler.Add(barricade)
 		g.AddBuilding(barricade)
+		g.clickHandler.Add(barricade)
 	}
 
 	g.AddBuilding(house)
 
+	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
+	g.drawHandler.Add(g.infoPanel)
+
+	g.clickHandler.Add(house)
+
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// パネルの枠を表示するための構造体
+type infoPanel struct {
+	game *Game
+
+	x, y          int
+	width, height int
+	zindex        int
+
+	icon *icon
+}
+
+func newInfoPanel(g *Game, w, h int) *infoPanel {
+	bottomMargin := 10
+	return &infoPanel{
+		game:   g,
+		x:      screenWidth/2 - w/2,
+		y:      screenHeight - h - bottomMargin,
+		width:  w,
+		height: h,
+		zindex: 10,
+	}
+}
+
+func (p *infoPanel) setIcon(i *icon) {
+	p.game.drawHandler.Remove(p.icon)
+
+	p.icon = i
+	if p.icon == nil {
+		return
+	}
+
+	p.game.drawHandler.Add(p.icon)
+}
+
+func (p *infoPanel) Draw(screen *ebiten.Image) {
+	// 枠を描画
+	strokeWidth := float32(2)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x+p.width), float32(p.y), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x), float32(p.y+p.height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x+p.width), float32(p.y), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(p.x), float32(p.y+p.height), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
+}
+
+func (p *infoPanel) ZIndex() int {
+	return p.zindex
 }
