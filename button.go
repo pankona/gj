@@ -32,12 +32,11 @@ func (b *Button) ZIndex() int {
 
 func newReadyButton(g *Game) *Button {
 	return newButton(g, 1, func(screen *ebiten.Image) {
-		screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
 		buttonWidth, buttonHeight := 100, 40
-		buttonX := screenWidth - buttonWidth - 20
-		buttonY := screenHeight - buttonHeight - 20
+		buttonX := screenWidth - buttonWidth - 12
+		buttonY := eScreenHeight - buttonHeight - 20
 
-		const buttonMargin = 5 // 枠の幅
+		const buttonMargin = 2 // 枠の幅
 
 		// ボタンの枠を描く（白）
 		vector.DrawFilledRect(screen,
