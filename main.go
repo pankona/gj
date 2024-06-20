@@ -20,6 +20,8 @@ type Game struct {
 	// 建物のリスト
 	buildings []Building
 
+	infoPanel *infoPanel
+
 	clickedObject string
 }
 
@@ -138,7 +140,8 @@ func main() {
 
 	g.AddBuilding(house)
 
-	g.drawHandler.Add(newInfoPanel(screenWidth-20, infoPanelHeight))
+	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
+	g.drawHandler.Add(g.infoPanel)
 
 	g.clickHandler.Add(house)
 
@@ -149,20 +152,36 @@ func main() {
 
 // パネルの枠を表示するための構造体
 type infoPanel struct {
+	game *Game
+
 	x, y          int
 	width, height int
 	zindex        int
+
+	icon *icon
 }
 
-func newInfoPanel(w, h int) *infoPanel {
+func newInfoPanel(g *Game, w, h int) *infoPanel {
 	bottomMargin := 10
 	return &infoPanel{
+		game:   g,
 		x:      screenWidth/2 - w/2,
 		y:      screenHeight - h - bottomMargin,
 		width:  w,
 		height: h,
 		zindex: 10,
 	}
+}
+
+func (p *infoPanel) setIcon(i *icon) {
+	p.game.drawHandler.Remove(p.icon)
+
+	p.icon = i
+	if p.icon == nil {
+		return
+	}
+
+	p.game.drawHandler.Add(p.icon)
 }
 
 func (p *infoPanel) Draw(screen *ebiten.Image) {

@@ -221,6 +221,10 @@ func (b *bug) OnClick() {
 	default:
 		log.Fatal("invalid bug color")
 	}
+
+	// infoPanel に情報を表示する
+	icon := newBugIcon(80, eScreenHeight+70, b.selfColor)
+	b.game.infoPanel.setIcon(icon)
 }
 
 func (b *bug) IsClicked(x, y int) bool {

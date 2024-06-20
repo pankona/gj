@@ -93,6 +93,9 @@ func (h *house) Damage(d int) {
 // house implements Clickable interface
 func (h *house) OnClick() {
 	h.game.clickedObject = "house"
+	// infoPanel に情報を表示する
+	icon := newHouseIcon(80, eScreenHeight+70)
+	h.game.infoPanel.setIcon(icon)
 }
 
 func (h *house) IsClicked(x, y int) bool {
