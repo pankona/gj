@@ -8,7 +8,8 @@
     <script src="wasm_exec.js"></script>
     <script>
         const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then(result => {
+        const wasmURL = "main.wasm?v=" + new Date().getTime();
+        WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject).then(result => {
             go.run(result.instance);
         });
     </script>
