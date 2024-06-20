@@ -47,8 +47,8 @@ func newHouse(game *Game) *house {
 		image: ebiten.NewImageFromImage(img),
 	}
 
-	h.x = screenWidth/2 - int(float64(h.width)*h.scale)/2
-	h.y = screenHeight/2 - int(float64(h.height)*h.scale)/2
+	h.x = screenWidth / 2
+	h.y = screenHeight / 2
 
 	return h
 }
@@ -58,7 +58,7 @@ func (h *house) Draw(screen *ebiten.Image) {
 	// 画像を描画
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(h.scale, h.scale)
-	opts.GeoM.Translate(float64(h.x), float64(h.y))
+	opts.GeoM.Translate(float64(h.x)-float64(h.width)*h.scale/2, float64(h.y)-float64(h.height)*h.scale/2)
 	screen.DrawImage(h.image, opts)
 }
 
@@ -68,7 +68,7 @@ func (h *house) ZIndex() int {
 
 func (h *house) Position() (int, int) {
 	// 中央の座標を返す
-	return h.x + int(float64(h.width)*h.scale)/2, h.y + int(float64(h.height)*h.scale)/2
+	return h.x, h.y
 }
 
 func (h *house) Size() (int, int) {

@@ -66,8 +66,7 @@ func (b *barricade) ZIndex() int {
 }
 
 func (b *barricade) Position() (int, int) {
-	// 画像の中心の座標を返す
-	return b.x + int(float64(b.width)*b.scale)/2, b.y + int(float64(b.height)*b.scale)/2
+	return b.x, b.y
 }
 
 func (b *barricade) Size() (int, int) {
