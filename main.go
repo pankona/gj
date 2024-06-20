@@ -58,7 +58,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
 
 	// 画面中央に点を表示 (debug)
-	vector.DrawFilledRect(screen, screenWidth/2, screenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
 	// house の HP を表示
 	for _, building := range g.buildings {
@@ -74,6 +74,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 const (
 	screenWidth  = 1280
 	screenHeight = 960
+)
+
+const (
+	// infoPanel の高さを計算
+	// infoPanel の高さの分だけ、ゲーム画面の中央座標が上にずれる
+	// 中央座標計算のためにあらかじめここで計算しておく
+	infoPanelHeight = screenHeight / 7
+	eScreenHeight   = screenHeight - infoPanelHeight - 10
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -99,12 +107,12 @@ func main() {
 
 	//とりあえずいったん虫を画面の下部に配置
 	redBugs := []*bug{
-		newBug(g, bugsRed, screenWidth/2-50, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-30, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-10, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+10, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+30, screenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+50, screenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100),
 	}
 
 	for _, redBug := range redBugs {
@@ -117,9 +125,9 @@ func main() {
 
 	// バリケードを家のすぐ下に配置
 	barricades := []*barricade{
-		newBarricade(g, screenWidth/2-105, screenHeight/2+80),
-		newBarricade(g, screenWidth/2, screenHeight/2+80),
-		newBarricade(g, screenWidth/2+105, screenHeight/2+80),
+		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80),
+		newBarricade(g, screenWidth/2, eScreenHeight/2+80),
+		newBarricade(g, screenWidth/2+105, eScreenHeight/2+80),
 	}
 	for _, barricade := range barricades {
 		g.drawHandler.Add(barricade)
@@ -128,7 +136,7 @@ func main() {
 
 	g.AddBuilding(house)
 
-	g.drawHandler.Add(newInfoPanel(screenWidth-20, screenHeight/7))
+	g.drawHandler.Add(newInfoPanel(screenWidth-20, infoPanelHeight))
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

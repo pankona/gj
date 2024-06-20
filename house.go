@@ -48,7 +48,7 @@ func newHouse(game *Game) *house {
 	}
 
 	h.x = screenWidth / 2
-	h.y = screenHeight / 2
+	h.y = eScreenHeight / 2
 
 	return h
 }
