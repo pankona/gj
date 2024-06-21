@@ -74,7 +74,7 @@ func (b *barricade) Size() (int, int) {
 }
 
 func (b *barricade) Name() string {
-	return "barricade"
+	return "Barricade"
 }
 
 func (b *barricade) Damage(d int) {

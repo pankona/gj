@@ -76,7 +76,7 @@ func (h *house) Size() (int, int) {
 }
 
 func (h *house) Name() string {
-	return "house"
+	return "House"
 }
 
 func (h *house) Damage(d int) {
@@ -92,7 +92,7 @@ func (h *house) Damage(d int) {
 
 // house implements Clickable interface
 func (h *house) OnClick() {
-	h.game.clickedObject = "house"
+	h.game.clickedObject = "House"
 	// infoPanel に情報を表示する
 	icon := newHouseIcon(80, eScreenHeight+70)
 	h.game.infoPanel.setIcon(icon)

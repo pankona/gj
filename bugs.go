@@ -179,7 +179,7 @@ func redBugUpdate(b *bug) {
 	var moveTargetX, moveTargetY int
 
 	for _, building := range b.game.buildings {
-		if building.Name() == "house" {
+		if building.Name() == "House" {
 			moveTargetX, moveTargetY = building.Position()
 			break
 		}
