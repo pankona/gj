@@ -27,6 +27,9 @@ type house struct {
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
+
+	// health が 0 になったときに呼ばれる関数
+	onDestroy func(h *house)
 }
 
 func newHouse(game *Game) *house {
