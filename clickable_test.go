@@ -11,7 +11,7 @@ type MockClickable struct {
 	zIndex        int
 }
 
-func (m *MockClickable) OnClick() {
+func (m *MockClickable) OnClick(x, y int) {
 	m.clicked = true
 }
 
