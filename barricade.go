@@ -95,7 +95,7 @@ func (b *barricade) Damage(d int) {
 }
 
 // barricade implements Clickable interface
-func (b *barricade) OnClick() {
+func (b *barricade) OnClick(x, y int) {
 	b.game.clickedObject = "barricade"
 	// infoPanel に情報を表示する
 	icon := newBarricadeIcon(80, eScreenHeight+70)

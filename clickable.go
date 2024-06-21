@@ -5,7 +5,7 @@ import (
 )
 
 type Clickable interface {
-	OnClick()
+	OnClick(x, y int)
 	IsClicked(x, y int) bool
 	ZIndex() int
 }
@@ -37,7 +37,7 @@ func (o *OnClickHandler) Remove(obj Clickable) {
 func (o *OnClickHandler) HandleClick(x, y int) {
 	for _, obj := range o.clickableObjects {
 		if obj.IsClicked(x, y) {
-			obj.OnClick()
+			obj.OnClick(x, y)
 
 			// 一つクリックされたら終了
 			// オブジェクトが重なっている場合、一番手前のオブジェクトのみがクリックされるという仕様にしておく
