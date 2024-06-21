@@ -40,10 +40,6 @@ func (p *infoPanel) setIcon(i *icon) {
 	if p.icon == nil {
 		return
 	}
-
-	// TODO: ここじゃなくて infoPanel の Draw で描画するようにする
-	// みっともない
-	p.game.drawHandler.Add(p.icon)
 }
 
 type infoer interface {
@@ -53,6 +49,12 @@ type infoer interface {
 
 func (p *infoPanel) setUnit(u infoer) {
 	p.unit = u
+}
+
+func (p *infoPanel) Remove(u infoer) {
+	if p.unit == u {
+		p.unit = nil
+	}
 }
 
 func (p *infoPanel) Draw(screen *ebiten.Image) {
@@ -69,6 +71,7 @@ func (p *infoPanel) Draw(screen *ebiten.Image) {
 	if p.unit == nil {
 		return
 	}
+	p.icon.Draw(screen)
 	name, health := p.unit.Name(), p.unit.Health()
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%s", name), p.x+100+40, p.y+30)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("HP: %d", health), p.x+100+40, p.y+50)

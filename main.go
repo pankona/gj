@@ -136,6 +136,7 @@ func main() {
 		g.updateHandler.Remove(b)
 		g.clickHandler.Remove(b)
 		g.RemoveEnemy(b)
+		g.infoPanel.Remove(b)
 	}
 
 	//とりあえずいったん虫を画面の下部に配置
@@ -163,6 +164,7 @@ func main() {
 		g.drawHandler.Remove(b)
 		g.clickHandler.Remove(b)
 		g.RemoveBuilding(b)
+		g.infoPanel.Remove(b)
 	}
 	barricades := []*barricade{
 		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80, barricadeOnDestroyFn),
