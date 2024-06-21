@@ -2,11 +2,12 @@ package main
 
 import (
 	"bytes"
-	_ "embed"
 	"image"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+
+	_ "embed"
 )
 
 // 攻撃のためのクリックを受け止める透明なパネル
