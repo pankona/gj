@@ -96,6 +96,11 @@ func (h *house) OnClick() {
 	// infoPanel に情報を表示する
 	icon := newHouseIcon(80, eScreenHeight+70)
 	h.game.infoPanel.setIcon(icon)
+	h.game.infoPanel.setUnit(h)
+}
+
+func (h *house) Health() int {
+	return h.health
 }
 
 func (h *house) IsClicked(x, y int) bool {

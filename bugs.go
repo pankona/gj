@@ -18,13 +18,16 @@ var bugsImageData []byte
 type bugColor int
 
 type bug struct {
-	game          *Game
+	game *Game
+
 	x, y          int
 	width, height int
 	zindex        int
 	image         *ebiten.Image
 	selfColor     bugColor
 
+	name        string
+	health      int
 	speed       float64
 	attackPower int
 	attackRange float64
@@ -66,13 +69,18 @@ func newBug(game *Game, bugColor bugColor, x, y int) *bug {
 	bugImage := bugsImage.SubImage(rect).(*ebiten.Image)
 
 	return &bug{
-		game:      game,
+		game: game,
+
 		x:         x,
 		y:         y,
 		width:     bugImage.Bounds().Dx(),
 		height:    bugImage.Bounds().Dy(),
 		image:     bugImage,
 		selfColor: bugColor,
+
+		// TODO: 虫種別によって異なる値を設定できるようにする
+		name:   "Red bug",
+		health: 2,
 
 		speed:       5,
 		attackPower: 1,
@@ -197,6 +205,10 @@ func greenBugUpdate(b *bug) {
 	// todo: implement
 }
 
+func (b *bug) Name() string {
+	return b.name
+}
+
 // 画面中央に配置
 func (b *bug) Draw(screen *ebiten.Image) {
 	// 画像を描画
@@ -225,6 +237,11 @@ func (b *bug) OnClick() {
 	// infoPanel に情報を表示する
 	icon := newBugIcon(80, eScreenHeight+70, b.selfColor)
 	b.game.infoPanel.setIcon(icon)
+	b.game.infoPanel.setUnit(b)
+}
+
+func (b *bug) Health() int {
+	return b.health
 }
 
 func (b *bug) IsClicked(x, y int) bool {

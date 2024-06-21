@@ -62,14 +62,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 画面中央に点を表示 (debug)
 	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
-	// house の HP を表示
-	for _, building := range g.buildings {
-		if building.Name() == "house" {
-			h := building.(*house)
-			ebitenutil.DebugPrintAt(screen, fmt.Sprintf("House HP: %d", h.health), 0, 40)
-		}
-	}
-
 	g.drawHandler.HandleDraw(screen)
 }
 
@@ -148,51 +140,4 @@ func main() {
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
-}
-
-// パネルの枠を表示するための構造体
-type infoPanel struct {
-	game *Game
-
-	x, y          int
-	width, height int
-	zindex        int
-
-	icon *icon
-}
-
-func newInfoPanel(g *Game, w, h int) *infoPanel {
-	bottomMargin := 10
-	return &infoPanel{
-		game:   g,
-		x:      screenWidth/2 - w/2,
-		y:      screenHeight - h - bottomMargin,
-		width:  w,
-		height: h,
-		zindex: 10,
-	}
-}
-
-func (p *infoPanel) setIcon(i *icon) {
-	p.game.drawHandler.Remove(p.icon)
-
-	p.icon = i
-	if p.icon == nil {
-		return
-	}
-
-	p.game.drawHandler.Add(p.icon)
-}
-
-func (p *infoPanel) Draw(screen *ebiten.Image) {
-	// 枠を描画
-	strokeWidth := float32(2)
-	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x+p.width), float32(p.y), strokeWidth, color.White, true)
-	vector.StrokeLine(screen, float32(p.x), float32(p.y), float32(p.x), float32(p.y+p.height), strokeWidth, color.White, true)
-	vector.StrokeLine(screen, float32(p.x+p.width), float32(p.y), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
-	vector.StrokeLine(screen, float32(p.x), float32(p.y+p.height), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
-}
-
-func (p *infoPanel) ZIndex() int {
-	return p.zindex
 }
