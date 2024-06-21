@@ -39,6 +39,9 @@ type bug struct {
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
+
+	// health が 0 になったときに呼ばれる関数
+	onDestroy func(b *bug)
 }
 
 const (
@@ -179,7 +182,7 @@ func redBugUpdate(b *bug) {
 	var moveTargetX, moveTargetY int
 
 	for _, building := range b.game.buildings {
-		if building.Name() == "house" {
+		if building.Name() == "House" {
 			moveTargetX, moveTargetY = building.Position()
 			break
 		}

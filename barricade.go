@@ -27,9 +27,12 @@ type barricade struct {
 	// 画像の拡大率。
 	// 1以外を指定する場合は元画像のサイズをそもそも変更できないか検討すること
 	scale float64
+
+	// health が 0 になったときに呼ばれる関数
+	onDestroy func(b *barricade)
 }
 
-func newBarricade(game *Game, x, y int) *barricade {
+func newBarricade(game *Game, x, y int, onDestroy func(b *barricade)) *barricade {
 	img, _, err := image.Decode(bytes.NewReader(barricadeImageData))
 	if err != nil {
 		log.Fatal(err)
@@ -47,6 +50,8 @@ func newBarricade(game *Game, x, y int) *barricade {
 		health: 100,
 
 		image: ebiten.NewImageFromImage(img),
+
+		onDestroy: onDestroy,
 	}
 
 	return h
@@ -74,7 +79,7 @@ func (b *barricade) Size() (int, int) {
 }
 
 func (b *barricade) Name() string {
-	return "barricade"
+	return "Barricade"
 }
 
 func (b *barricade) Damage(d int) {
@@ -85,6 +90,7 @@ func (b *barricade) Damage(d int) {
 	b.health -= d
 	if b.health <= 0 {
 		b.health = 0
+		b.onDestroy(b)
 	}
 }
 

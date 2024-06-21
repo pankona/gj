@@ -35,6 +35,15 @@ func (g *Game) AddBuilding(b Building) {
 	g.buildings = append(g.buildings, b)
 }
 
+func (g *Game) RemoveBuilding(b Building) {
+	for i, building := range g.buildings {
+		if building == b {
+			g.buildings = append(g.buildings[:i], g.buildings[i+1:]...)
+			return
+		}
+	}
+}
+
 func (g *Game) Update() error {
 	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
 	// これをやると登録された Clickable の OnClick が呼ばれる
@@ -119,10 +128,15 @@ func main() {
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 
 	// バリケードを家のすぐ下に配置
+	barricadeOnDestroyFn := func(b *barricade) {
+		g.drawHandler.Remove(b)
+		g.clickHandler.Remove(b)
+		g.RemoveBuilding(b)
+	}
 	barricades := []*barricade{
-		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80),
-		newBarricade(g, screenWidth/2, eScreenHeight/2+80),
-		newBarricade(g, screenWidth/2+105, eScreenHeight/2+80),
+		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80, barricadeOnDestroyFn),
+		newBarricade(g, screenWidth/2, eScreenHeight/2+80, barricadeOnDestroyFn),
+		newBarricade(g, screenWidth/2+105, eScreenHeight/2+80, barricadeOnDestroyFn),
 	}
 	for _, barricade := range barricades {
 		g.drawHandler.Add(barricade)

@@ -50,6 +50,7 @@ func (i *icon) ZIndex() int {
 	return i.zindex
 }
 
+// TODO: これらは icon.go にいるのはふさわしくない
 func newHouseIcon(x, y int) *icon {
 	img, _, err := image.Decode(bytes.NewReader(houseImageData))
 	if err != nil {
