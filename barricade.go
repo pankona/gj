@@ -94,6 +94,11 @@ func (b *barricade) OnClick() {
 	// infoPanel に情報を表示する
 	icon := newBarricadeIcon(80, eScreenHeight+70)
 	b.game.infoPanel.setIcon(icon)
+	b.game.infoPanel.setUnit(b)
+}
+
+func (b *barricade) Health() int {
+	return b.health
 }
 
 func (b *barricade) IsClicked(x, y int) bool {
