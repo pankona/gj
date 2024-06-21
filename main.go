@@ -20,9 +20,31 @@ type Game struct {
 	// 建物のリスト
 	buildings []Building
 
+	// 敵のリスト
+	enemies []Enemy
+
 	infoPanel *infoPanel
 
 	clickedObject string
+}
+
+type Enemy interface {
+	Position() (int, int)
+	Size() (int, int)
+	Name() string
+}
+
+func (g *Game) AddEnemy(e Enemy) {
+	g.enemies = append(g.enemies, e)
+}
+
+func (g *Game) RemoveEnemy(e Enemy) {
+	for i, enemy := range g.enemies {
+		if enemy == e {
+			g.enemies = append(g.enemies[:i], g.enemies[i+1:]...)
+			return
+		}
+	}
 }
 
 type Building interface {
@@ -59,6 +81,7 @@ func (g *Game) Update() error {
 		g.clickedPositionX = x
 		g.clickedPositionY = y
 	}
+
 	return nil
 }
 
@@ -108,20 +131,28 @@ func main() {
 	g.drawHandler.Add(house)
 	g.drawHandler.Add(newReadyButton(g))
 
+	bugDestroyFn := func(b *bug) {
+		g.drawHandler.Remove(b)
+		g.updateHandler.Remove(b)
+		g.clickHandler.Remove(b)
+		g.RemoveEnemy(b)
+	}
+
 	//とりあえずいったん虫を画面の下部に配置
 	redBugs := []*bug{
-		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100),
-		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100),
-		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100),
+		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
 	}
 
 	for _, redBug := range redBugs {
 		g.drawHandler.Add(redBug)
 		g.updateHandler.Add(redBug)
 		g.clickHandler.Add(redBug)
+		g.AddEnemy(redBug)
 	}
 
 	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
@@ -150,6 +181,10 @@ func main() {
 	g.drawHandler.Add(g.infoPanel)
 
 	g.clickHandler.Add(house)
+
+	// TODO: 本当はウェーブ中だけこれをやる
+	attackPane := newAttackPane(g)
+	g.clickHandler.Add(attackPane)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)

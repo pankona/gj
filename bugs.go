@@ -50,7 +50,7 @@ const (
 	bugsGreen
 )
 
-func newBug(game *Game, bugColor bugColor, x, y int) *bug {
+func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bug {
 	img, _, err := image.Decode(bytes.NewReader(bugsImageData))
 	if err != nil {
 		log.Fatal(err)
@@ -90,6 +90,8 @@ func newBug(game *Game, bugColor bugColor, x, y int) *bug {
 		attackRange: 1,
 
 		scale: 1,
+
+		onDestroy: onDestroy,
 	}
 }
 
@@ -124,6 +126,19 @@ func (b *bug) attack(a Damager) {
 
 type Damager interface {
 	Damage(int)
+}
+
+func (b *bug) Damage(d int) {
+	if b.health <= 0 {
+		return
+	}
+
+	b.health -= d
+
+	if b.health <= 0 {
+		b.health = 0
+		b.onDestroy(b)
+	}
 }
 
 type rect struct {
@@ -212,6 +227,14 @@ func (b *bug) Name() string {
 	return b.name
 }
 
+func (b *bug) Position() (int, int) {
+	return b.x, b.y
+}
+
+func (b *bug) Size() (int, int) {
+	return b.width, b.height
+}
+
 // 画面中央に配置
 func (b *bug) Draw(screen *ebiten.Image) {
 	// 画像を描画
@@ -225,7 +248,7 @@ func (b *bug) ZIndex() int {
 	return b.zindex
 }
 
-func (b *bug) OnClick() {
+func (b *bug) OnClick(x, y int) {
 	switch b.selfColor {
 	case bugsRed:
 		b.game.clickedObject = "red bug"

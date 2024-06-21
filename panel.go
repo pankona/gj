@@ -41,6 +41,8 @@ func (p *infoPanel) setIcon(i *icon) {
 		return
 	}
 
+	// TODO: ここじゃなくて infoPanel の Draw で描画するようにする
+	// みっともない
 	p.game.drawHandler.Add(p.icon)
 }
 
