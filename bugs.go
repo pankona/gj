@@ -248,7 +248,7 @@ func (b *bug) ZIndex() int {
 	return b.zindex
 }
 
-func (b *bug) OnClick(x, y int) {
+func (b *bug) OnClick(x, y int) bool {
 	switch b.selfColor {
 	case bugsRed:
 		b.game.clickedObject = "red bug"
@@ -264,6 +264,8 @@ func (b *bug) OnClick(x, y int) {
 	icon := newBugIcon(80, eScreenHeight+70, b.selfColor)
 	b.game.infoPanel.setIcon(icon)
 	b.game.infoPanel.setUnit(b)
+
+	return false
 }
 
 func (b *bug) Health() int {

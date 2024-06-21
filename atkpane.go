@@ -139,12 +139,13 @@ func newAttackPane(game *Game) *attackPane {
 }
 
 // attackPane implement Clickable interface
-func (a *attackPane) OnClick(x, y int) {
+// attackPane はクリックが下のオブジェクトに貫通する。攻撃中でも建物や敵の情報を見ることができるようにするため
+func (a *attackPane) OnClick(x, y int) bool {
 	hand := newSmallHand(a.game)
 
-	// cooldown があけていなかったらクリックを受け付けない
+	// cooldown があけていなかったら攻撃を発動しない
 	if hand.erapsedTime != 0 && hand.erapsedTime < hand.cooldown {
-		return
+		return true
 	}
 
 	// smallHand をクリック位置に表示する
@@ -156,6 +157,8 @@ func (a *attackPane) OnClick(x, y int) {
 
 	a.game.updateHandler.Add(hand)
 	a.game.drawHandler.Add(hand)
+
+	return true
 }
 
 func (a *attackPane) IsClicked(x, y int) bool {
