@@ -77,6 +77,11 @@ func (h *house) Position() (int, int) {
 	return h.x, h.y
 }
 
+func (h *house) SetPosition(x, y int) {
+	h.x = x
+	h.y = y
+}
+
 func (h *house) Size() (int, int) {
 	return int(float64(h.width) * h.scale), int(float64(h.height) * h.scale)
 }
@@ -107,6 +112,10 @@ func (h *house) OnClick(x, y int) bool {
 	// infoPanel にバリケード建築ボタンを表示
 	buildBarricadeButton := newButton(h.game,
 		225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+		func(x, y int) bool {
+			h.game.buildCandidate = newBarricade(h.game, 0, 0, func(b *barricade) {})
+			return false
+		},
 		func(screen *ebiten.Image, x, y, width, height int) {
 			drawRect(screen, x, y, width, height)
 			barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)

@@ -25,6 +25,9 @@ type Game struct {
 
 	infoPanel *infoPanel
 
+	// 建築対象としていったん保持されているオブジェクト
+	buildCandidate Building
+
 	clickedObject string
 }
 
@@ -49,8 +52,11 @@ func (g *Game) RemoveEnemy(e Enemy) {
 
 type Building interface {
 	Position() (int, int)
+	SetPosition(int, int)
 	Size() (int, int)
 	Name() string
+
+	Drawable
 }
 
 func (g *Game) AddBuilding(b Building) {
@@ -186,8 +192,13 @@ func main() {
 	g.clickHandler.Add(house)
 
 	// TODO: 本当はウェーブ中だけこれをやる
-	attackPane := newAttackPane(g)
-	g.clickHandler.Add(attackPane)
+	//attackPane := newAttackPane(g)
+	//g.clickHandler.Add(attackPane)
+
+	// TODO: 本当はウェーブの間だけこれをやる
+	buildPane := newBuildPane(g)
+	g.clickHandler.Add(buildPane)
+	g.drawHandler.Add(buildPane)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
