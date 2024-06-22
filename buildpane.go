@@ -7,7 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// 攻撃のためのクリックを受け止める透明なパネル
+// 建築のためのクリックを受け止める透明なパネル
 // 情報パネルを除く画面全体に敷かれ、それなりに高い ZIndex を持つ
 type buildPane struct {
 	game *Game
