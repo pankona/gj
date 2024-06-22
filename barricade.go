@@ -74,6 +74,11 @@ func (b *barricade) Position() (int, int) {
 	return b.x, b.y
 }
 
+func (b *barricade) SetPosition(x, y int) {
+	b.x = x
+	b.y = y
+}
+
 func (b *barricade) Size() (int, int) {
 	return int(float64(b.width) * b.scale), int(float64(b.height) * b.scale)
 }

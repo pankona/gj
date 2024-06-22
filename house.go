@@ -6,8 +6,11 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
+	"image/color"
 	_ "image/png"
 )
 
@@ -74,6 +77,11 @@ func (h *house) Position() (int, int) {
 	return h.x, h.y
 }
 
+func (h *house) SetPosition(x, y int) {
+	h.x = x
+	h.y = y
+}
+
 func (h *house) Size() (int, int) {
 	return int(float64(h.width) * h.scale), int(float64(h.height) * h.scale)
 }
@@ -101,11 +109,37 @@ func (h *house) OnClick(x, y int) bool {
 	h.game.infoPanel.setIcon(icon)
 	h.game.infoPanel.setUnit(h)
 
+	// infoPanel にバリケード建築ボタンを表示
+	buildBarricadeButton := newButton(h.game,
+		225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+		func(x, y int) bool {
+			h.game.buildCandidate = newBarricade(h.game, 0, 0, func(b *barricade) {})
+			return false
+		},
+		func(screen *ebiten.Image, x, y, width, height int) {
+			drawRect(screen, x, y, width, height)
+			barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
+			barricadeIcon.Draw(screen)
+
+			ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
+		})
+
+	h.game.infoPanel.ClearButtons()
+	h.game.infoPanel.AddButton(buildBarricadeButton)
+
 	return false
 }
 
 func (h *house) Health() int {
 	return h.health
+}
+
+func drawRect(screen *ebiten.Image, x, y, width, height int) {
+	strokeWidth := float32(2)
+	vector.StrokeLine(screen, float32(x), float32(y), float32(x+width), float32(y), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(x), float32(y), float32(x), float32(y+height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(x+width), float32(y), float32(x+width), float32(y+height), strokeWidth, color.White, true)
+	vector.StrokeLine(screen, float32(x), float32(y+height), float32(x+width), float32(y+height), strokeWidth, color.White, true)
 }
 
 func (h *house) IsClicked(x, y int) bool {

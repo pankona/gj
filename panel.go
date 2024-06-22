@@ -17,8 +17,9 @@ type infoPanel struct {
 	width, height int
 	zindex        int
 
-	icon *icon
-	unit infoer
+	icon    *icon
+	unit    infoer
+	buttons []*Button
 }
 
 func newInfoPanel(g *Game, w, h int) *infoPanel {
@@ -57,6 +58,26 @@ func (p *infoPanel) Remove(u infoer) {
 	}
 }
 
+func (p *infoPanel) AddButton(b *Button) {
+	p.buttons = append(p.buttons, b)
+	p.game.clickHandler.Add(b)
+}
+
+func (p *infoPanel) RemoveButton(b *Button) {
+	for i, button := range p.buttons {
+		if button == b {
+			p.game.clickHandler.Remove(b)
+			p.game.drawHandler.Remove(b)
+			p.buttons = append(p.buttons[:i], p.buttons[i+1:]...)
+			return
+		}
+	}
+}
+
+func (p *infoPanel) ClearButtons() {
+	p.buttons = nil
+}
+
 func (p *infoPanel) Draw(screen *ebiten.Image) {
 	// 枠を描画
 	strokeWidth := float32(2)
@@ -75,6 +96,11 @@ func (p *infoPanel) Draw(screen *ebiten.Image) {
 	name, health := p.unit.Name(), p.unit.Health()
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%s", name), p.x+100+40, p.y+30)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("HP: %d", health), p.x+100+40, p.y+50)
+
+	// ボタンを描画
+	for _, button := range p.buttons {
+		button.Draw(screen)
+	}
 }
 
 func (p *infoPanel) ZIndex() int {

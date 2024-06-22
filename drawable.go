@@ -36,6 +36,15 @@ func (o *DrawHandler) Remove(obj Drawable) {
 	}
 }
 
+func (o *DrawHandler) Lookup(obj Drawable) bool {
+	for _, v := range o.drawable {
+		if v == obj {
+			return true
+		}
+	}
+	return false
+}
+
 func (o *DrawHandler) HandleDraw(screen *ebiten.Image) {
 	for _, obj := range o.drawable {
 		obj.Draw(screen)

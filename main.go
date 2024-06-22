@@ -25,6 +25,9 @@ type Game struct {
 
 	infoPanel *infoPanel
 
+	// 建築対象としていったん保持されているオブジェクト
+	buildCandidate Building
+
 	clickedObject string
 }
 
@@ -49,8 +52,11 @@ func (g *Game) RemoveEnemy(e Enemy) {
 
 type Building interface {
 	Position() (int, int)
+	SetPosition(int, int)
 	Size() (int, int)
 	Name() string
+
+	Drawable
 }
 
 func (g *Game) AddBuilding(b Building) {
@@ -131,22 +137,22 @@ func main() {
 	g.drawHandler.Add(house)
 	g.drawHandler.Add(newReadyButton(g))
 
-	bugDestroyFn := func(b *bug) {
-		g.drawHandler.Remove(b)
-		g.updateHandler.Remove(b)
-		g.clickHandler.Remove(b)
-		g.RemoveEnemy(b)
-		g.infoPanel.Remove(b)
-	}
+	//bugDestroyFn := func(b *bug) {
+	//	g.drawHandler.Remove(b)
+	//	g.updateHandler.Remove(b)
+	//	g.clickHandler.Remove(b)
+	//	g.RemoveEnemy(b)
+	//	g.infoPanel.Remove(b)
+	//}
 
 	//とりあえずいったん虫を画面の下部に配置
 	redBugs := []*bug{
-		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
+		//newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
 	}
 
 	for _, redBug := range redBugs {
@@ -160,16 +166,17 @@ func main() {
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 
 	// バリケードを家のすぐ下に配置
-	barricadeOnDestroyFn := func(b *barricade) {
-		g.drawHandler.Remove(b)
-		g.clickHandler.Remove(b)
-		g.RemoveBuilding(b)
-		g.infoPanel.Remove(b)
-	}
+	//	barricadeOnDestroyFn := func(b *barricade) {
+	//		g.drawHandler.Remove(b)
+	//		g.clickHandler.Remove(b)
+	//		g.RemoveBuilding(b)
+	//		g.infoPanel.Remove(b)
+	//	}
+
 	barricades := []*barricade{
-		newBarricade(g, screenWidth/2-105, eScreenHeight/2+80, barricadeOnDestroyFn),
-		newBarricade(g, screenWidth/2, eScreenHeight/2+80, barricadeOnDestroyFn),
-		newBarricade(g, screenWidth/2+105, eScreenHeight/2+80, barricadeOnDestroyFn),
+		//newBarricade(g, screenWidth/2-105, eScreenHeight/2+80, barricadeOnDestroyFn),
+		//newBarricade(g, screenWidth/2, eScreenHeight/2+80, barricadeOnDestroyFn),
+		//newBarricade(g, screenWidth/2+105, eScreenHeight/2+80, barricadeOnDestroyFn),
 	}
 	for _, barricade := range barricades {
 		g.drawHandler.Add(barricade)
@@ -185,8 +192,13 @@ func main() {
 	g.clickHandler.Add(house)
 
 	// TODO: 本当はウェーブ中だけこれをやる
-	attackPane := newAttackPane(g)
-	g.clickHandler.Add(attackPane)
+	//attackPane := newAttackPane(g)
+	//g.clickHandler.Add(attackPane)
+
+	// TODO: 本当はウェーブの間だけこれをやる
+	buildPane := newBuildPane(g)
+	g.clickHandler.Add(buildPane)
+	g.drawHandler.Add(buildPane)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
