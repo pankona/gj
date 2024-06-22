@@ -9,21 +9,28 @@ import (
 )
 
 type Button struct {
-	game   *Game
-	zindex int
-	onDraw func(screen *ebiten.Image)
+	game *Game
+
+	x, y          int
+	width, height int
+	zindex        int
+	onDraw        func(screen *ebiten.Image, x, y, width, height int)
 }
 
-func newButton(g *Game, zindex int, drawFn func(screen *ebiten.Image)) *Button {
+func newButton(g *Game, x, y, width, height, zindex int, drawFn func(screen *ebiten.Image, x, y, width, height int)) *Button {
 	return &Button{
 		game:   g,
+		x:      x,
+		y:      y,
+		width:  width,
+		height: height,
 		zindex: zindex,
 		onDraw: drawFn,
 	}
 }
 
 func (b *Button) Draw(screen *ebiten.Image) {
-	b.onDraw(screen)
+	b.onDraw(screen, b.x, b.y, b.width, b.height)
 }
 
 func (b *Button) ZIndex() int {
@@ -31,24 +38,23 @@ func (b *Button) ZIndex() int {
 }
 
 func newReadyButton(g *Game) *Button {
-	return newButton(g, 1, func(screen *ebiten.Image) {
-		buttonWidth, buttonHeight := 100, 40
-		buttonX := screenWidth - buttonWidth - 12
-		buttonY := eScreenHeight - buttonHeight - 20
+	width, height := 100, 40
+	x := screenWidth - width - 12
+	y := eScreenHeight - height - 20
 
+	return newButton(g, x, y, width, height, 1, func(screen *ebiten.Image, x, y, width, height int) {
 		const buttonMargin = 2 // 枠の幅
 
 		// ボタンの枠を描く（白）
 		vector.DrawFilledRect(screen,
-			float32(buttonX-buttonMargin), float32(buttonY-buttonMargin),
-			float32(buttonWidth+2*buttonMargin), float32(buttonHeight+2*buttonMargin),
+			float32(x-buttonMargin), float32(y-buttonMargin),
+			float32(width+2*buttonMargin), float32(height+2*buttonMargin),
 			color.White, true)
 
 		// ボタンの背景を描く（黒）
-		vector.DrawFilledRect(screen, float32(buttonX), float32(buttonY), float32(buttonWidth), float32(buttonHeight), color.Black, true)
+		vector.DrawFilledRect(screen, float32(x), float32(y), float32(width), float32(height), color.Black, true)
 
 		// ボタンのテキストを描く（白）
-		ebitenutil.DebugPrintAt(screen, "READY", buttonX+buttonWidth/2-15, buttonY+buttonHeight/2-7)
+		ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
 	})
-
 }
