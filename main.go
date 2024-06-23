@@ -11,11 +11,18 @@ import (
 )
 
 type Game struct {
+	// デバッグのための変数
 	clickedPositionX, clickedPositionY int
+	clickedObject                      string
 
+	// ゲーム全編通して使うハンドラ
 	clickHandler  *OnClickHandler
 	drawHandler   *DrawHandler
 	updateHandler *UpdateHandler
+
+	// 以下はメインのゲームシーンで使う変数
+	// TODO: シーンごとに Game 構造体を分けるべきかもしれない
+	phase Phase
 
 	// 建物のリスト
 	buildings []Building
@@ -23,13 +30,21 @@ type Game struct {
 	// 敵のリスト
 	enemies []Enemy
 
+	// 情報パネル
 	infoPanel *infoPanel
 
 	// 建築対象としていったん保持されているオブジェクト
 	buildCandidate Building
-
-	clickedObject string
 }
+
+type Phase int
+
+const (
+	// 建築フェーズ
+	PhaseBuilding Phase = iota
+	// ウェーブフェーズ
+	PhaseWave
+)
 
 type Enemy interface {
 	Position() (int, int)
@@ -120,6 +135,39 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
+func newReadyButton(g *Game) *Button {
+	width, height := 100, 40
+	x := screenWidth - width - 12
+	y := eScreenHeight - height - 20
+
+	return newButton(g, x, y, width, height, 1,
+		func(x, y int) bool {
+			// 現在のフェーズによって処理を変える
+			// 建築フェーズの場合はウェーブフェーズに遷移する
+			// - buildpane を取り去る
+			// - atkpane を追加する
+			// ウェーブフェーズの場合は建築フェーズに遷移する
+			// - atkpane を取り去る
+			// - buildpane を追加する
+
+			switch g.phase {
+			case PhaseBuilding:
+
+			case PhaseWave:
+
+			default:
+				log.Fatalf("unexpected phase: %v", g.phase)
+			}
+
+			return false
+		},
+		func(screen *ebiten.Image, x, y, width, height int) {
+			// ボタンの枠を描く（白）
+			drawRect(screen, x, y, width, height)
+			ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
+		})
+}
+
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
@@ -131,6 +179,8 @@ func main() {
 	}
 
 	// 最初のシーンをセットアップする
+	g.phase = PhaseBuilding
+
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
 	house := newHouse(g)
@@ -191,11 +241,11 @@ func main() {
 
 	g.clickHandler.Add(house)
 
-	// TODO: 本当はウェーブ中だけこれをやる
+	// TODO: 本当はウェーブフェーズだけこれをやる
 	//attackPane := newAttackPane(g)
 	//g.clickHandler.Add(attackPane)
 
-	// TODO: 本当はウェーブの間だけこれをやる
+	// TODO: 本当は建築フェーズだけこれをやる
 	buildPane := newBuildPane(g)
 	g.clickHandler.Add(buildPane)
 	g.drawHandler.Add(buildPane)

@@ -1,11 +1,7 @@
 package main
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type Button struct {
@@ -48,28 +44,4 @@ func (b *Button) Draw(screen *ebiten.Image) {
 
 func (b *Button) ZIndex() int {
 	return b.zindex
-}
-
-func newReadyButton(g *Game) *Button {
-	width, height := 100, 40
-	x := screenWidth - width - 12
-	y := eScreenHeight - height - 20
-
-	return newButton(g, x, y, width, height, 1,
-		func(x, y int) bool { return false },
-		func(screen *ebiten.Image, x, y, width, height int) {
-			const buttonMargin = 2 // 枠の幅
-
-			// ボタンの枠を描く（白）
-			vector.DrawFilledRect(screen,
-				float32(x-buttonMargin), float32(y-buttonMargin),
-				float32(width+2*buttonMargin), float32(height+2*buttonMargin),
-				color.White, true)
-
-			// ボタンの背景を描く（黒）
-			vector.DrawFilledRect(screen, float32(x), float32(y), float32(width), float32(height), color.Black, true)
-
-			// ボタンのテキストを描く（白）
-			ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
-		})
 }
