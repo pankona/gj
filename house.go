@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"image"
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,7 +11,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
-	"image/color"
 	_ "image/png"
 )
 
@@ -105,27 +105,41 @@ func (h *house) Damage(d int) {
 func (h *house) OnClick(x, y int) bool {
 	h.game.clickedObject = "House"
 	// infoPanel に情報を表示する
+	h.game.infoPanel.ClearButtons()
 	icon := newHouseIcon(80, eScreenHeight+70)
 	h.game.infoPanel.setIcon(icon)
 	h.game.infoPanel.setUnit(h)
 
-	// infoPanel にバリケード建築ボタンを表示
-	buildBarricadeButton := newButton(h.game,
-		225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
-		func(x, y int) bool {
-			h.game.buildCandidate = newBarricade(h.game, 0, 0, func(b *barricade) {})
-			return false
-		},
-		func(screen *ebiten.Image, x, y, width, height int) {
-			drawRect(screen, x, y, width, height)
-			barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
-			barricadeIcon.Draw(screen)
+	switch h.game.phase {
+	case PhaseBuilding:
+		// infoPanel にバリケード建築ボタンを表示
+		buildBarricadeButton := newButton(h.game,
+			225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				barricadeOnDestroyFn := func(b *barricade) {
+					b.game.drawHandler.Remove(b)
+					b.game.clickHandler.Remove(b)
+					b.game.RemoveBuilding(b)
+					b.game.infoPanel.Remove(b)
+				}
 
-			ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
-		})
+				h.game.buildCandidate = newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
+				barricadeIcon.Draw(screen)
 
-	h.game.infoPanel.ClearButtons()
-	h.game.infoPanel.AddButton(buildBarricadeButton)
+				ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
+			})
+
+		h.game.infoPanel.AddButton(buildBarricadeButton)
+	case PhaseWave:
+		// TODO: implement
+	default:
+		log.Fatalf("unexpected phase: %v", h.game.phase)
+	}
 
 	return false
 }

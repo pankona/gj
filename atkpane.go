@@ -168,3 +168,7 @@ func (a *attackPane) IsClicked(x, y int) bool {
 func (a *attackPane) ZIndex() int {
 	return a.zindex
 }
+
+func (a *attackPane) RemoveAll() {
+	a.game.clickHandler.Remove(a)
+}
