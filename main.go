@@ -154,6 +154,10 @@ func (g *Game) SetBuildingPhase() {
 func (g *Game) SetWavePhase() {
 	g.phase = PhaseWave
 
+	// 情報パネルをクリアする (Build のメニューなどが出ていたら消すため)
+	g.infoPanel.unit = nil
+	g.infoPanel.ClearButtons()
+
 	// building phase で追加したものを削除
 	g.drawHandler.Remove(g.buildPane)
 	g.clickHandler.Remove(g.buildPane)
@@ -192,39 +196,6 @@ func (g *Game) SetWavePhase() {
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 }
 
-func newReadyButton(g *Game) *Button {
-	width, height := 100, 40
-	x := screenWidth - width - 12
-	y := eScreenHeight - height - 20
-
-	return newButton(g, x, y, width, height, 1,
-		func(x, y int) bool {
-			// 現在のフェーズによって処理を変える
-			// 建築フェーズの場合はウェーブフェーズに遷移する
-			// - buildpane を取り去る
-			// - atkpane を追加する
-			// ウェーブフェーズの場合は建築フェーズに遷移する
-			// - atkpane を取り去る
-			// - buildpane を追加する
-
-			switch g.phase {
-			case PhaseBuilding:
-				g.SetWavePhase()
-			case PhaseWave:
-				g.SetBuildingPhase()
-			default:
-				log.Fatalf("unexpected phase: %v", g.phase)
-			}
-
-			return false
-		},
-		func(screen *ebiten.Image, x, y, width, height int) {
-			// ボタンの枠を描く（白）
-			drawRect(screen, x, y, width, height)
-			ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
-		})
-}
-
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
@@ -255,6 +226,4 @@ func (g *Game) initialize() {
 
 	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
 	g.drawHandler.Add(g.infoPanel)
-
-	g.drawHandler.Add(newReadyButton(g))
 }

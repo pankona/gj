@@ -109,30 +109,37 @@ func (h *house) OnClick(x, y int) bool {
 	h.game.infoPanel.setIcon(icon)
 	h.game.infoPanel.setUnit(h)
 
-	// infoPanel にバリケード建築ボタンを表示
-	buildBarricadeButton := newButton(h.game,
-		225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
-		func(x, y int) bool {
-			barricadeOnDestroyFn := func(b *barricade) {
-				b.game.drawHandler.Remove(b)
-				b.game.clickHandler.Remove(b)
-				b.game.RemoveBuilding(b)
-				b.game.infoPanel.Remove(b)
-			}
+	switch h.game.phase {
+	case PhaseBuilding:
+		// infoPanel にバリケード建築ボタンを表示
+		buildBarricadeButton := newButton(h.game,
+			225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				barricadeOnDestroyFn := func(b *barricade) {
+					b.game.drawHandler.Remove(b)
+					b.game.clickHandler.Remove(b)
+					b.game.RemoveBuilding(b)
+					b.game.infoPanel.Remove(b)
+				}
 
-			h.game.buildCandidate = newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
-			return false
-		},
-		func(screen *ebiten.Image, x, y, width, height int) {
-			drawRect(screen, x, y, width, height)
-			barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
-			barricadeIcon.Draw(screen)
+				h.game.buildCandidate = newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
+				barricadeIcon.Draw(screen)
 
-			ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
-		})
+				ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
+			})
 
-	h.game.infoPanel.ClearButtons()
-	h.game.infoPanel.AddButton(buildBarricadeButton)
+		h.game.infoPanel.ClearButtons()
+		h.game.infoPanel.AddButton(buildBarricadeButton)
+	case PhaseWave:
+		// TODO: implement
+	default:
+		log.Fatalf("unexpected phase: %v", h.game.phase)
+	}
 
 	return false
 }
