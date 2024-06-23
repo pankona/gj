@@ -1,11 +1,12 @@
 package main
 
 import (
-	_ "embed"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+
+	_ "embed"
 )
 
 // 建築のためのクリックを受け止める透明なパネル
