@@ -170,6 +170,8 @@ func (a *attackPane) ZIndex() int {
 }
 
 func (a *attackPane) RemoveAll() {
+	// 初期化順序の関係で a が nil になることがある
+	// TODO: みっともないので直せたら直す
 	if a == nil {
 		return
 	}
