@@ -42,6 +42,8 @@ type Game struct {
 
 	// ウェーブのコントローラ
 	waveCtrl *waveController
+
+	credit int
 }
 
 type Phase int
@@ -137,6 +139,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// updateHandler の長さを表示
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
 
+	// 画面右上にクレジットを表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Credit: %d", g.credit), screenWidth-100, 0)
+
 	// 画面中央に点を表示 (debug)
 	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
@@ -221,6 +226,9 @@ func (g *Game) SetWavePhase() {
 	// 敵が全滅したことをコールバックする
 	waveEndFn := func() {
 		g.SetBuildingPhase()
+
+		// ウェーブ終了時に一定のクレジットを得る
+		g.credit += 100
 	}
 
 	g.waveCtrl = newWaveController(g, waveEndFn)
@@ -281,4 +289,7 @@ func (g *Game) initialize() {
 
 	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
 	g.drawHandler.Add(g.infoPanel)
+
+	// クレジットを初期化
+	g.credit = 100
 }
