@@ -54,6 +54,11 @@ const (
 )
 
 const (
+	// 画面上にデバッグ情報を表示するかどうか
+	debugEnabled = true
+)
+
+const (
 	// 建築フェーズ
 	PhaseBuilding Phase = iota
 	// ウェーブフェーズ
@@ -93,10 +98,8 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// クリックされた位置を表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
-	// クリックされたオブジェクトを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
+	g.drawHandler.HandleDraw(screen)
+
 	// 現在のフェーズを表示
 	switch g.phase {
 	case PhaseBuilding:
@@ -105,20 +108,27 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
 	}
 
-	// drawHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("DrawHandler: %d", len(g.drawHandler.drawable)), 0, 60)
-	// clickHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("ClickHandler: %d", len(g.clickHandler.clickableObjects)), 0, 80)
-	// updateHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
-
 	// 画面右上にクレジットを表示
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Credit: %d", g.credit), screenWidth-100, 0)
 
-	// 画面中央に点を表示 (debug)
-	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	// 以下はデバッグ情報
 
-	g.drawHandler.HandleDraw(screen)
+	if debugEnabled {
+		// クリックされた位置を表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
+		// クリックされたオブジェクトを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
+
+		// drawHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("DrawHandler: %d", len(g.drawHandler.drawable)), 0, 60)
+		// clickHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("ClickHandler: %d", len(g.clickHandler.clickableObjects)), 0, 80)
+		// updateHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
+
+		// 画面中央に点を表示 (debug)
+		vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -208,6 +218,10 @@ func (g *Game) initialize() {
 
 	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
 	g.drawHandler.Add(g.infoPanel)
+
+	// 背景担当
+	bg := newBackground(g)
+	g.drawHandler.Add(bg)
 
 	// クレジットを初期化
 	g.credit = 100
