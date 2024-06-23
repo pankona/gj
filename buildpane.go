@@ -45,6 +45,10 @@ func newBuildPane(game *Game) *buildPane {
 			// クリックされたら建築を確定する
 			game.AddBuilding(game.buildCandidate)
 			game.clickHandler.Add(game.buildCandidate)
+			// クレジットを減らす
+			game.credit -= game.buildCandidate.Cost()
+
+			// buildCandidate は次の建築のために初期化する
 			game.buildCandidate = nil
 
 			return false

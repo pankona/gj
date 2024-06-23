@@ -55,6 +55,11 @@ const (
 	PhaseWave
 )
 
+// コスト一覧
+const (
+	CostBarricadeBuild = 30
+)
+
 type Enemy interface {
 	Position() (int, int)
 	Size() (int, int)
@@ -82,6 +87,8 @@ type Building interface {
 
 	SetOverlap(bool)
 	IsOverlap() bool
+
+	Cost() int
 
 	Clickable
 	Drawable

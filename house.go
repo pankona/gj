@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -131,7 +132,7 @@ func (h *house) OnClick(x, y int) bool {
 				barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
 				barricadeIcon.Draw(screen)
 
-				ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostBarricadeBuild), x+width/2-30, y+height/2+40)
 			})
 
 		h.game.infoPanel.AddButton(buildBarricadeButton)
@@ -177,4 +178,9 @@ func (h *house) SetOverlap(overlap bool) {
 func (h *house) IsOverlap() bool {
 	// 登場の機会はないので実装しない
 	return false
+}
+
+func (h *house) Cost() int {
+	// 登場の機会はないので実装しない
+	return 0
 }
