@@ -78,6 +78,9 @@ type Building interface {
 	Size() (int, int)
 	Name() string
 
+	SetOverlap(bool)
+	IsOverlap() bool
+
 	Clickable
 	Drawable
 }

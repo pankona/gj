@@ -30,6 +30,9 @@ type barricade struct {
 
 	// health が 0 になったときに呼ばれる関数
 	onDestroy func(b *barricade)
+
+	// この建物が他の建物と重なっているかどうか (建築確定前に用いるフラグ)
+	isOverlapping bool
 }
 
 func newBarricade(game *Game, x, y int, onDestroy func(b *barricade)) *barricade {
@@ -63,6 +66,15 @@ func (b *barricade) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(b.scale, b.scale)
 	opts.GeoM.Translate(float64(b.x)-float64(b.width)*b.scale/2, float64(b.y)-float64(b.height)*b.scale/2)
+
+	// 他の建物と重なっている場合は赤くする
+	if b.isOverlapping {
+		opts.ColorScale.Scale(1, 0, 0, 1)
+	} else if b.game.buildCandidate == b {
+		// 建築確定前は暗い色で建物を描画する
+		opts.ColorScale.Scale(0.5, 0.5, 0.5, 1)
+	}
+
 	screen.DrawImage(b.image, opts)
 }
 
@@ -121,4 +133,29 @@ func (b *barricade) Health() int {
 func (b *barricade) IsClicked(x, y int) bool {
 	w, h := b.Size()
 	return b.x-w/2 <= x && x <= b.x+w/2 && b.y-h/2 <= y && y <= b.y+h/2
+}
+
+func (b *barricade) SetOverlap(overlap bool) {
+	b.isOverlapping = overlap
+}
+
+func (b *barricade) IsOverlap() bool {
+	// 他の建物と重なっているかどうかを判定する
+	for _, building := range b.game.buildings {
+		if building == b {
+			continue
+		}
+
+		bx, by := building.Position()
+		bw, bh := building.Size()
+
+		if intersects(
+			rect{b.x - b.width/2, b.y - b.height/2, b.width, b.height},
+			rect{bx - bw/2, by - bh/2, bw, bh},
+		) {
+			return true
+		}
+	}
+
+	return false
 }

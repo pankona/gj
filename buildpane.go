@@ -37,6 +37,11 @@ func newBuildPane(game *Game) *buildPane {
 				return true
 			}
 
+			// 建築不可能な場所を指定していた場合は何もしない
+			if game.buildCandidate.IsOverlap() {
+				return false
+			}
+
 			// クリックされたら建築を確定する
 			game.AddBuilding(game.buildCandidate)
 			game.clickHandler.Add(game.buildCandidate)
@@ -53,8 +58,12 @@ func newBuildPane(game *Game) *buildPane {
 				// まだ場所が決まっていない場合はボタンを無効にする
 				return
 			}
-
-			drawRect(screen, x, y, width, height)
+			// 置けない場所に建築しようとした場合はボタンをグレーアウトする
+			if game.buildCandidate.IsOverlap() {
+				drawGrayRect(screen, x, y, width, height)
+			} else {
+				drawRect(screen, x, y, width, height)
+			}
 			ebitenutil.DebugPrintAt(screen, "OK", x+width/2-10, y+height/2-8)
 		})
 
@@ -129,6 +138,9 @@ func (a *buildPane) OnClick(x, y int) bool {
 	}
 
 	a.game.buildCandidate.SetPosition(x, y)
+
+	// 他の建築物と重なっているかどうか判定してフラグをセットする
+	a.game.buildCandidate.SetOverlap(a.game.buildCandidate.IsOverlap())
 
 	return true
 }
