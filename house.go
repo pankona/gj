@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -116,6 +117,11 @@ func (h *house) OnClick(x, y int) bool {
 		buildBarricadeButton := newButton(h.game,
 			225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
 			func(x, y int) bool {
+				if h.game.credit < CostBarricadeBuild {
+					// お金が足りない場合は建築できない
+					return false
+				}
+
 				barricadeOnDestroyFn := func(b *barricade) {
 					b.game.drawHandler.Remove(b)
 					b.game.clickHandler.Remove(b)
@@ -131,7 +137,16 @@ func (h *house) OnClick(x, y int) bool {
 				barricadeIcon := newBarricadeIcon(x+width/2, y+height/2-10)
 				barricadeIcon.Draw(screen)
 
-				ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostBarricadeBuild), x+width/2-30, y+height/2+40)
+
+				if h.game.credit < CostBarricadeBuild {
+					// お金が足りないときはボタン全体をグレーアウトする
+					overlay := ebiten.NewImage(width, height)
+					overlay.Fill(color.RGBA{128, 128, 128, 128})
+					overlayOpts := &ebiten.DrawImageOptions{}
+					overlayOpts.GeoM.Translate(float64(x), float64(y))
+					screen.DrawImage(overlay, overlayOpts)
+				}
 			})
 
 		h.game.infoPanel.AddButton(buildBarricadeButton)
@@ -177,4 +192,9 @@ func (h *house) SetOverlap(overlap bool) {
 func (h *house) IsOverlap() bool {
 	// 登場の機会はないので実装しない
 	return false
+}
+
+func (h *house) Cost() int {
+	// 登場の機会はないので実装しない
+	return 0
 }

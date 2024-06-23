@@ -159,3 +159,7 @@ func (b *barricade) IsOverlap() bool {
 
 	return false
 }
+
+func (b *barricade) Cost() int {
+	return CostBarricadeBuild
+}
