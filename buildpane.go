@@ -130,6 +130,8 @@ func (a *buildPane) OnClick(x, y int) bool {
 
 	a.game.buildCandidate.SetPosition(x, y)
 
+	// 建築確定前は暗い色で建物を描画する
+
 	return true
 }
 

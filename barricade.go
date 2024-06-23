@@ -63,6 +63,12 @@ func (b *barricade) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(b.scale, b.scale)
 	opts.GeoM.Translate(float64(b.x)-float64(b.width)*b.scale/2, float64(b.y)-float64(b.height)*b.scale/2)
+
+	if b.game.buildCandidate == b {
+		// 建築確定前は暗い色で建物を描画する
+		opts.ColorScale.Scale(0.5, 0.5, 0.5, 1)
+	}
+
 	screen.DrawImage(b.image, opts)
 }
 

@@ -170,5 +170,8 @@ func (a *attackPane) ZIndex() int {
 }
 
 func (a *attackPane) RemoveAll() {
+	if a == nil {
+		return
+	}
 	a.game.clickHandler.Remove(a)
 }
