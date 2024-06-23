@@ -39,6 +39,9 @@ type Game struct {
 	// panes
 	attackPane *attackPane
 	buildPane  *buildPane
+
+	// ウェーブのコントローラ
+	waveCtrl *waveController
 }
 
 type Phase int
@@ -116,6 +119,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
 	// クリックされたオブジェクトを表示
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
+	// 現在のフェーズを表示
+	switch g.phase {
+	case PhaseBuilding:
+		ebitenutil.DebugPrintAt(screen, "Phase: Building", 0, 40)
+	case PhaseWave:
+		ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
+	}
 
 	// 画面中央に点を表示 (debug)
 	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
@@ -192,8 +202,36 @@ func (g *Game) SetWavePhase() {
 		g.AddEnemy(redBug)
 	}
 
+	// 敵が全滅したらウェーブを終了して建築フェーズに戻る
+	// 敵が全滅したことをコールバックする
+	waveEndFn := func() {
+		g.SetBuildingPhase()
+	}
+
+	g.waveCtrl = newWaveController(g, waveEndFn)
+	g.updateHandler.Add(g.waveCtrl)
+
 	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
+}
+
+type waveController struct {
+	game *Game
+
+	onWaveEnd func()
+}
+
+func newWaveController(g *Game, onWaveEnd func()) *waveController {
+	return &waveController{
+		game:      g,
+		onWaveEnd: onWaveEnd,
+	}
+}
+
+func (w *waveController) Update() {
+	if len(w.game.enemies) == 0 {
+		w.onWaveEnd()
+	}
 }
 
 func main() {
