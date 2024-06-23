@@ -127,6 +127,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
 	}
 
+	// drawHandler の長さを表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("DrawHandler: %d", len(g.drawHandler.drawable)), 0, 60)
+	// clickHandler の長さを表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("ClickHandler: %d", len(g.clickHandler.clickableObjects)), 0, 80)
+	// updateHandler の長さを表示
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
+
 	// 画面中央に点を表示 (debug)
 	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 
@@ -153,12 +160,17 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func (g *Game) SetBuildingPhase() {
 	g.phase = PhaseBuilding
 
+	// 情報パネルをいったんクリアする
+	g.infoPanel.unit = nil
+	g.infoPanel.ClearButtons()
+
+	// wave phase で追加したものを削除
+	g.attackPane.RemoveAll()
+
+	// Build phase に必要なものを追加
 	g.buildPane = newBuildPane(g)
 	g.clickHandler.Add(g.buildPane)
 	g.drawHandler.Add(g.buildPane)
-
-	// wave phase で追加したものを削除
-	g.clickHandler.Remove(g.attackPane)
 }
 
 func (g *Game) SetWavePhase() {
@@ -169,9 +181,9 @@ func (g *Game) SetWavePhase() {
 	g.infoPanel.ClearButtons()
 
 	// building phase で追加したものを削除
-	g.drawHandler.Remove(g.buildPane)
-	g.clickHandler.Remove(g.buildPane)
+	g.buildPane.RemoveAll()
 
+	// Wave phase に必要なものを追加
 	g.attackPane = newAttackPane(g)
 	g.clickHandler.Add(g.attackPane)
 
@@ -231,6 +243,8 @@ func newWaveController(g *Game, onWaveEnd func()) *waveController {
 func (w *waveController) Update() {
 	if len(w.game.enemies) == 0 {
 		w.onWaveEnd()
+		// ウェーブが終了したら自分自身を削除する
+		w.game.updateHandler.Remove(w)
 	}
 }
 
@@ -246,15 +260,15 @@ func main() {
 
 	g.initialize()
 
+	// 最初のシーンをセットアップする
+	g.SetBuildingPhase()
+
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func (g *Game) initialize() {
-	// 最初のシーンをセットアップする
-	g.SetBuildingPhase()
-
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
 	house := newHouse(g)

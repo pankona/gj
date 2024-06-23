@@ -105,6 +105,7 @@ func (h *house) Damage(d int) {
 func (h *house) OnClick(x, y int) bool {
 	h.game.clickedObject = "House"
 	// infoPanel に情報を表示する
+	h.game.infoPanel.ClearButtons()
 	icon := newHouseIcon(80, eScreenHeight+70)
 	h.game.infoPanel.setIcon(icon)
 	h.game.infoPanel.setUnit(h)
@@ -133,7 +134,6 @@ func (h *house) OnClick(x, y int) bool {
 				ebitenutil.DebugPrintAt(screen, "BUILD", x+width/2-20, y+height/2+40)
 			})
 
-		h.game.infoPanel.ClearButtons()
 		h.game.infoPanel.AddButton(buildBarricadeButton)
 	case PhaseWave:
 		// TODO: implement

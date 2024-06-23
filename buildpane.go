@@ -172,3 +172,13 @@ func newReadyButton(g *Game) *Button {
 			ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
 		})
 }
+
+// ウェーブフェーズに繊維するとき、建築フェーズのパネルを取り去る
+// このとき、ClickHandler や DrawHandler に入れたボタンも取り去る
+func (p *buildPane) RemoveAll() {
+	p.game.clickHandler.Remove(p.okButton)
+	p.game.clickHandler.Remove(p.cancelButton)
+	p.game.clickHandler.Remove(p.readyButton)
+	p.game.drawHandler.Remove(p)
+	p.game.clickHandler.Remove(p)
+}

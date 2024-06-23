@@ -67,7 +67,6 @@ func (p *infoPanel) RemoveButton(b *Button) {
 	for i, button := range p.buttons {
 		if button == b {
 			p.game.clickHandler.Remove(b)
-			p.game.drawHandler.Remove(b)
 			p.buttons = append(p.buttons[:i], p.buttons[i+1:]...)
 			return
 		}
@@ -75,6 +74,9 @@ func (p *infoPanel) RemoveButton(b *Button) {
 }
 
 func (p *infoPanel) ClearButtons() {
+	for _, button := range p.buttons {
+		p.game.clickHandler.Remove(button)
+	}
 	p.buttons = nil
 }
 
