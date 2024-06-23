@@ -148,6 +148,15 @@ func (h *house) Health() int {
 	return h.health
 }
 
+// グレーアウトした drawRect を描画
+func drawGrayRect(screen *ebiten.Image, x, y, width, height int) {
+	strokeWidth := float32(2)
+	vector.StrokeLine(screen, float32(x), float32(y), float32(x+width), float32(y), strokeWidth, color.Gray16{0x8888}, true)
+	vector.StrokeLine(screen, float32(x), float32(y), float32(x), float32(y+height), strokeWidth, color.Gray16{0x8888}, true)
+	vector.StrokeLine(screen, float32(x+width), float32(y), float32(x+width), float32(y+height), strokeWidth, color.Gray16{0x8888}, true)
+	vector.StrokeLine(screen, float32(x), float32(y+height), float32(x+width), float32(y+height), strokeWidth, color.Gray16{0x8888}, true)
+}
+
 func drawRect(screen *ebiten.Image, x, y, width, height int) {
 	strokeWidth := float32(2)
 	vector.StrokeLine(screen, float32(x), float32(y), float32(x+width), float32(y), strokeWidth, color.White, true)
@@ -159,4 +168,13 @@ func drawRect(screen *ebiten.Image, x, y, width, height int) {
 func (h *house) IsClicked(x, y int) bool {
 	width, height := h.Size()
 	return h.x-width/2 <= x && x <= h.x+width/2 && h.y-height/2 <= y && y <= h.y+height/2
+}
+
+func (h *house) SetOverlap(overlap bool) {
+	// 登場の機会はないので実装しない
+}
+
+func (h *house) IsOverlap() bool {
+	// 登場の機会はないので実装しない
+	return false
 }
