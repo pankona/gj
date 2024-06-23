@@ -117,6 +117,11 @@ func (h *house) OnClick(x, y int) bool {
 		buildBarricadeButton := newButton(h.game,
 			225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
 			func(x, y int) bool {
+				if h.game.credit < CostBarricadeBuild {
+					// お金が足りない場合は建築できない
+					return false
+				}
+
 				barricadeOnDestroyFn := func(b *barricade) {
 					b.game.drawHandler.Remove(b)
 					b.game.clickHandler.Remove(b)
@@ -133,6 +138,16 @@ func (h *house) OnClick(x, y int) bool {
 				barricadeIcon.Draw(screen)
 
 				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostBarricadeBuild), x+width/2-30, y+height/2+40)
+
+				if h.game.credit < CostBarricadeBuild {
+					// お金が足りないときはボタン全体をグレーアウトする
+					overlay := ebiten.NewImage(width, height)
+					overlay.Fill(color.RGBA{128, 128, 128, 128})
+					overlayOpts := &ebiten.DrawImageOptions{}
+					overlayOpts.GeoM.Translate(float64(x), float64(y))
+					screen.DrawImage(overlay, overlayOpts)
+				}
+
 			})
 
 		h.game.infoPanel.AddButton(buildBarricadeButton)
