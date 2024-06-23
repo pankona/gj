@@ -210,9 +210,28 @@ func redBugUpdate(b *bug) {
 	// 移動方向のラジアンを計算
 	angle := math.Atan2(float64(dy), float64(dx))
 
+	// 回避動作
+	// 虫同士がぴったり重ならないようにするための計算
+	// やや自信のないロジックではある
+	avoidX, avoidY := 0.0, 0.0
+	for _, e := range b.game.enemies {
+		ee := e.(*bug)
+		if ee != b {
+			distX := float64(ee.x - b.x)
+			distY := float64(ee.y - b.y)
+			distance := math.Sqrt(distX*distX + distY*distY)
+			if distance < float64(b.width) {
+				avoidX -= distX / distance
+				avoidY -= distY / distance
+			}
+		}
+	}
+
 	// 移動
-	b.x += int(math.Cos(angle) * b.speed)
-	b.y += int(math.Sin(angle) * b.speed)
+	moveX := math.Cos(angle)*b.speed + avoidX
+	moveY := math.Sin(angle)*b.speed + avoidY
+	b.x += int(moveX)
+	b.y += int(moveY)
 }
 
 func blueBugUpdate(b *bug) {
