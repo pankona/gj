@@ -113,7 +113,14 @@ func (h *house) OnClick(x, y int) bool {
 	buildBarricadeButton := newButton(h.game,
 		225, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
 		func(x, y int) bool {
-			h.game.buildCandidate = newBarricade(h.game, 0, 0, func(b *barricade) {})
+			barricadeOnDestroyFn := func(b *barricade) {
+				b.game.drawHandler.Remove(b)
+				b.game.clickHandler.Remove(b)
+				b.game.RemoveBuilding(b)
+				b.game.infoPanel.Remove(b)
+			}
+
+			h.game.buildCandidate = newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
 			return false
 		},
 		func(screen *ebiten.Image, x, y, width, height int) {

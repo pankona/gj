@@ -34,8 +34,8 @@ func newBuildPane(game *Game) *buildPane {
 			}
 
 			// クリックされたら建築を確定する
-
 			game.AddBuilding(game.buildCandidate)
+			game.clickHandler.Add(game.buildCandidate)
 			game.buildCandidate = nil
 
 			return false

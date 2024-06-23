@@ -35,6 +35,10 @@ type Game struct {
 
 	// 建築対象としていったん保持されているオブジェクト
 	buildCandidate Building
+
+	// panes
+	attackPane *attackPane
+	buildPane  *buildPane
 }
 
 type Phase int
@@ -71,6 +75,7 @@ type Building interface {
 	Size() (int, int)
 	Name() string
 
+	Clickable
 	Drawable
 }
 
@@ -135,6 +140,58 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
+func (g *Game) SetBuildingPhase() {
+	g.phase = PhaseBuilding
+
+	g.buildPane = newBuildPane(g)
+	g.clickHandler.Add(g.buildPane)
+	g.drawHandler.Add(g.buildPane)
+
+	// wave phase で追加したものを削除
+	g.clickHandler.Remove(g.attackPane)
+}
+
+func (g *Game) SetWavePhase() {
+	g.phase = PhaseWave
+
+	// building phase で追加したものを削除
+	g.drawHandler.Remove(g.buildPane)
+	g.clickHandler.Remove(g.buildPane)
+
+	g.attackPane = newAttackPane(g)
+	g.clickHandler.Add(g.attackPane)
+
+	// とりあえずいったん虫を画面の下部に配置
+	// TODO: wave の設定にしたがって敵を生成できるようにする
+	bugDestroyFn := func(b *bug) {
+		g.drawHandler.Remove(b)
+		g.updateHandler.Remove(b)
+		g.clickHandler.Remove(b)
+		g.RemoveEnemy(b)
+		g.infoPanel.Remove(b)
+	}
+
+	//とりあえずいったん虫を画面の下部に配置
+	redBugs := []*bug{
+		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
+		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
+	}
+
+	for _, redBug := range redBugs {
+		g.drawHandler.Add(redBug)
+		g.updateHandler.Add(redBug)
+		g.clickHandler.Add(redBug)
+		g.AddEnemy(redBug)
+	}
+
+	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
+	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
+}
+
 func newReadyButton(g *Game) *Button {
 	width, height := 100, 40
 	x := screenWidth - width - 12
@@ -152,9 +209,9 @@ func newReadyButton(g *Game) *Button {
 
 			switch g.phase {
 			case PhaseBuilding:
-
+				g.SetWavePhase()
 			case PhaseWave:
-
+				g.SetBuildingPhase()
 			default:
 				log.Fatalf("unexpected phase: %v", g.phase)
 			}
@@ -178,79 +235,26 @@ func main() {
 		updateHandler: &UpdateHandler{},
 	}
 
+	g.initialize()
+
+	if err := ebiten.RunGame(g); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (g *Game) initialize() {
 	// 最初のシーンをセットアップする
-	g.phase = PhaseBuilding
+	g.SetBuildingPhase()
 
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
 	house := newHouse(g)
 	g.drawHandler.Add(house)
-	g.drawHandler.Add(newReadyButton(g))
-
-	//bugDestroyFn := func(b *bug) {
-	//	g.drawHandler.Remove(b)
-	//	g.updateHandler.Remove(b)
-	//	g.clickHandler.Remove(b)
-	//	g.RemoveEnemy(b)
-	//	g.infoPanel.Remove(b)
-	//}
-
-	//とりあえずいったん虫を画面の下部に配置
-	redBugs := []*bug{
-		//newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
-		//newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
-		//newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
-		//newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
-		//newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
-		//newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
-	}
-
-	for _, redBug := range redBugs {
-		g.drawHandler.Add(redBug)
-		g.updateHandler.Add(redBug)
-		g.clickHandler.Add(redBug)
-		g.AddEnemy(redBug)
-	}
-
-	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
-	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
-
-	// バリケードを家のすぐ下に配置
-	//	barricadeOnDestroyFn := func(b *barricade) {
-	//		g.drawHandler.Remove(b)
-	//		g.clickHandler.Remove(b)
-	//		g.RemoveBuilding(b)
-	//		g.infoPanel.Remove(b)
-	//	}
-
-	barricades := []*barricade{
-		//newBarricade(g, screenWidth/2-105, eScreenHeight/2+80, barricadeOnDestroyFn),
-		//newBarricade(g, screenWidth/2, eScreenHeight/2+80, barricadeOnDestroyFn),
-		//newBarricade(g, screenWidth/2+105, eScreenHeight/2+80, barricadeOnDestroyFn),
-	}
-	for _, barricade := range barricades {
-		g.drawHandler.Add(barricade)
-		g.AddBuilding(barricade)
-		g.clickHandler.Add(barricade)
-	}
-
 	g.AddBuilding(house)
+	g.clickHandler.Add(house)
 
 	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
 	g.drawHandler.Add(g.infoPanel)
 
-	g.clickHandler.Add(house)
-
-	// TODO: 本当はウェーブフェーズだけこれをやる
-	//attackPane := newAttackPane(g)
-	//g.clickHandler.Add(attackPane)
-
-	// TODO: 本当は建築フェーズだけこれをやる
-	buildPane := newBuildPane(g)
-	g.clickHandler.Add(buildPane)
-	g.drawHandler.Add(buildPane)
-
-	if err := ebiten.RunGame(g); err != nil {
-		log.Fatal(err)
-	}
+	g.drawHandler.Add(newReadyButton(g))
 }
