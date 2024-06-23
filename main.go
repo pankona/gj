@@ -49,6 +49,16 @@ type Game struct {
 type Phase int
 
 const (
+	screenWidth  = 1280
+	screenHeight = 960
+)
+
+const (
+	// 画面上にデバッグ情報を表示するかどうか
+	debugEnabled = true
+)
+
+const (
 	// 建築フェーズ
 	PhaseBuilding Phase = iota
 	// ウェーブフェーズ
@@ -60,52 +70,13 @@ const (
 	CostBarricadeBuild = 30
 )
 
-type Enemy interface {
-	Position() (int, int)
-	Size() (int, int)
-	Name() string
-}
-
-func (g *Game) AddEnemy(e Enemy) {
-	g.enemies = append(g.enemies, e)
-}
-
-func (g *Game) RemoveEnemy(e Enemy) {
-	for i, enemy := range g.enemies {
-		if enemy == e {
-			g.enemies = append(g.enemies[:i], g.enemies[i+1:]...)
-			return
-		}
-	}
-}
-
-type Building interface {
-	Position() (int, int)
-	SetPosition(int, int)
-	Size() (int, int)
-	Name() string
-
-	SetOverlap(bool)
-	IsOverlap() bool
-
-	Cost() int
-
-	Clickable
-	Drawable
-}
-
-func (g *Game) AddBuilding(b Building) {
-	g.buildings = append(g.buildings, b)
-}
-
-func (g *Game) RemoveBuilding(b Building) {
-	for i, building := range g.buildings {
-		if building == b {
-			g.buildings = append(g.buildings[:i], g.buildings[i+1:]...)
-			return
-		}
-	}
-}
+const (
+	// infoPanel の高さを計算
+	// infoPanel の高さの分だけ、ゲーム画面の中央座標が上にずれる
+	// 中央座標計算のためにあらかじめここで計算しておく
+	infoPanelHeight = screenHeight / 7
+	eScreenHeight   = screenHeight - infoPanelHeight - 10
+)
 
 func (g *Game) Update() error {
 	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
@@ -127,10 +98,8 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// クリックされた位置を表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
-	// クリックされたオブジェクトを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
+	g.drawHandler.HandleDraw(screen)
+
 	// 現在のフェーズを表示
 	switch g.phase {
 	case PhaseBuilding:
@@ -139,34 +108,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
 	}
 
-	// drawHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("DrawHandler: %d", len(g.drawHandler.drawable)), 0, 60)
-	// clickHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("ClickHandler: %d", len(g.clickHandler.clickableObjects)), 0, 80)
-	// updateHandler の長さを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
-
 	// 画面右上にクレジットを表示
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Credit: %d", g.credit), screenWidth-100, 0)
 
-	// 画面中央に点を表示 (debug)
-	vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	// 以下はデバッグ情報
 
-	g.drawHandler.HandleDraw(screen)
+	if debugEnabled {
+		// クリックされた位置を表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
+		// クリックされたオブジェクトを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Object: %s", g.clickedObject), 0, 20)
+
+		// drawHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("DrawHandler: %d", len(g.drawHandler.drawable)), 0, 60)
+		// clickHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("ClickHandler: %d", len(g.clickHandler.clickableObjects)), 0, 80)
+		// updateHandler の長さを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("UpdateHandler: %d", len(g.updateHandler.updaters)), 0, 100)
+
+		// 画面中央に点を表示 (debug)
+		vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+	}
 }
-
-const (
-	screenWidth  = 1280
-	screenHeight = 960
-)
-
-const (
-	// infoPanel の高さを計算
-	// infoPanel の高さの分だけ、ゲーム画面の中央座標が上にずれる
-	// 中央座標計算のためにあらかじめここで計算しておく
-	infoPanelHeight = screenHeight / 7
-	eScreenHeight   = screenHeight - infoPanelHeight - 10
-)
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
@@ -245,25 +208,23 @@ func (g *Game) SetWavePhase() {
 	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 }
 
-type waveController struct {
-	game *Game
+func (g *Game) initialize() {
+	// とりあえずいきなりゲームが始まるとする。
+	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
+	house := newHouse(g)
+	g.drawHandler.Add(house)
+	g.AddBuilding(house)
+	g.clickHandler.Add(house)
 
-	onWaveEnd func()
-}
+	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
+	g.drawHandler.Add(g.infoPanel)
 
-func newWaveController(g *Game, onWaveEnd func()) *waveController {
-	return &waveController{
-		game:      g,
-		onWaveEnd: onWaveEnd,
-	}
-}
+	// 背景担当
+	bg := newBackground(g)
+	g.drawHandler.Add(bg)
 
-func (w *waveController) Update() {
-	if len(w.game.enemies) == 0 {
-		w.onWaveEnd()
-		// ウェーブが終了したら自分自身を削除する
-		w.game.updateHandler.Remove(w)
-	}
+	// クレジットを初期化
+	g.credit = 100
 }
 
 func main() {
@@ -284,19 +245,4 @@ func main() {
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (g *Game) initialize() {
-	// とりあえずいきなりゲームが始まるとする。
-	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
-	house := newHouse(g)
-	g.drawHandler.Add(house)
-	g.AddBuilding(house)
-	g.clickHandler.Add(house)
-
-	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
-	g.drawHandler.Add(g.infoPanel)
-
-	// クレジットを初期化
-	g.credit = 100
 }
