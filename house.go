@@ -147,7 +147,6 @@ func (h *house) OnClick(x, y int) bool {
 					overlayOpts.GeoM.Translate(float64(x), float64(y))
 					screen.DrawImage(overlay, overlayOpts)
 				}
-
 			})
 
 		h.game.infoPanel.AddButton(buildBarricadeButton)
