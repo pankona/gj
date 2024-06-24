@@ -220,7 +220,7 @@ func redBugUpdate(b *bug) {
 			distX := float64(ee.x - b.x)
 			distY := float64(ee.y - b.y)
 			distance := math.Sqrt(distX*distX + distY*distY)
-			if distance < float64(b.width) {
+			if distance > 0 && distance < float64(b.width) {
 				avoidX -= distX / distance
 				avoidY -= distY / distance
 			}

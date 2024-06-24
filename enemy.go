@@ -4,6 +4,10 @@ type Enemy interface {
 	Position() (int, int)
 	Size() (int, int)
 	Name() string
+
+	Drawable
+	Clickable
+	Updater
 }
 
 func (g *Game) AddEnemy(e Enemy) {
