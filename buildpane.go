@@ -162,7 +162,7 @@ func newReadyButton(g *Game) *Button {
 	x := screenWidth - width - 12
 	y := eScreenHeight - height - 20
 
-	return newButton(g, x, y, width, height, 1,
+	return newButton(g, x, y, width, height, 110,
 		func(x, y int) bool {
 			// 現在のフェーズによって処理を変える
 			// 建築フェーズの場合はウェーブフェーズに遷移する

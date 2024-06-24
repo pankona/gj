@@ -161,6 +161,13 @@ func (g *Game) SetWavePhase() {
 	// building phase で追加したものを削除
 	g.buildPane.RemoveAll()
 
+	// 建築するつもりで持っているものも手放してもらう
+	// これをやっとかないと次の建築フェーズで開幕から建築物を持っている状態になってしまう
+	if g.buildCandidate != nil {
+		g.drawHandler.Remove(g.buildCandidate)
+		g.buildCandidate = nil
+	}
+
 	// Wave phase に必要なものを追加
 	g.attackPane = newAttackPane(g)
 	g.clickHandler.Add(g.attackPane)
