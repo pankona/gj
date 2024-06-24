@@ -130,6 +130,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		// 画面中央に点を表示 (debug)
 		vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
+		// 残りの敵の数を表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Enemies: %d", len(g.enemies)), 0, 120)
 	}
 }
 
@@ -174,47 +176,7 @@ func (g *Game) SetWavePhase() {
 	g.attackPane = newAttackPane(g)
 	g.clickHandler.Add(g.attackPane)
 
-	// とりあえずいったん虫を画面の下部に配置
-	// TODO: wave の設定にしたがって敵を生成できるようにする
-	bugDestroyFn := func(b *bug) {
-		g.drawHandler.Remove(b)
-		g.updateHandler.Remove(b)
-		g.clickHandler.Remove(b)
-		g.RemoveEnemy(b)
-		g.infoPanel.Remove(b)
-	}
-
-	//とりあえずいったん虫を画面の下部に配置
-	redBugs := []*bug{
-		newBug(g, bugsRed, screenWidth/2-50, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2-30, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2-10, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+10, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+30, eScreenHeight-100, bugDestroyFn),
-		newBug(g, bugsRed, screenWidth/2+50, eScreenHeight-100, bugDestroyFn),
-	}
-
-	for _, redBug := range redBugs {
-		g.drawHandler.Add(redBug)
-		g.updateHandler.Add(redBug)
-		g.clickHandler.Add(redBug)
-		g.AddEnemy(redBug)
-	}
-
-	// 敵が全滅したらウェーブを終了して建築フェーズに戻る
-	// 敵が全滅したことをコールバックする
-	waveEndFn := func() {
-		g.SetBuildingPhase()
-
-		// ウェーブ終了時に一定のクレジットを得る
-		g.credit += 100
-	}
-
-	g.waveCtrl = newWaveController(g, waveEndFn)
 	g.updateHandler.Add(g.waveCtrl)
-
-	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
-	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 }
 
 func (g *Game) initialize() {
@@ -234,6 +196,16 @@ func (g *Game) initialize() {
 
 	// クレジットを初期化
 	g.credit = 100
+
+	// 敵が全滅したらウェーブを終了して建築フェーズに戻る
+	// 敵が全滅したことをコールバックする
+	waveEndFn := func() {
+		g.SetBuildingPhase()
+		// ウェーブ終了時に一定のクレジットを得る
+		g.credit += 100
+	}
+
+	g.waveCtrl = newWaveController(g, waveEndFn)
 }
 
 func (g *Game) Reset() {
