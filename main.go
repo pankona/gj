@@ -24,6 +24,8 @@ type Game struct {
 	// TODO: シーンごとに Game 構造体を分けるべきかもしれない
 	phase Phase
 
+	house *house
+
 	// 建物のリスト
 	buildings []Building
 
@@ -218,10 +220,10 @@ func (g *Game) SetWavePhase() {
 func (g *Game) initialize() {
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
-	house := newHouse(g)
-	g.drawHandler.Add(house)
-	g.AddBuilding(house)
-	g.clickHandler.Add(house)
+	g.house = newHouse(g)
+	g.drawHandler.Add(g.house)
+	g.AddBuilding(g.house)
+	g.clickHandler.Add(g.house)
 
 	g.infoPanel = newInfoPanel(g, screenWidth-20, infoPanelHeight)
 	g.drawHandler.Add(g.infoPanel)
@@ -232,6 +234,17 @@ func (g *Game) initialize() {
 
 	// クレジットを初期化
 	g.credit = 100
+}
+
+func (g *Game) Reset() {
+	g.clickHandler.Clear()
+	g.drawHandler.Clear()
+	g.updateHandler.Clear()
+	g.buildings = []Building{}
+	g.enemies = []Enemy{}
+
+	g.initialize()
+	g.SetBuildingPhase()
 }
 
 func main() {

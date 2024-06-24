@@ -27,6 +27,6 @@ func (u *UpdateHandler) Remove(updater Updater) {
 	}
 }
 
-func (u UpdateHandler) Clear() {
+func (u *UpdateHandler) Clear() {
 	u.updaters = nil
 }

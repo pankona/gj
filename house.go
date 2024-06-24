@@ -52,6 +52,13 @@ func newHouse(game *Game) *house {
 		health: 100,
 
 		image: ebiten.NewImageFromImage(img),
+
+		onDestroy: func(h *house) {
+			// TODO: 爆発したり消えたりする処理を書く
+			// ここでフラグを設定しといて、Update() や Draw で続きの処理を行うのもあり
+			// いったんシンプルに消す
+			h.game.drawHandler.Remove(h)
+		},
 	}
 
 	h.x = screenWidth / 2
@@ -99,6 +106,7 @@ func (h *house) Damage(d int) {
 	h.health -= d
 	if h.health <= 0 {
 		h.health = 0
+		h.onDestroy(h)
 	}
 }
 
