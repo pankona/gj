@@ -122,6 +122,10 @@ func (h *house) OnClick(x, y int) bool {
 					return false
 				}
 
+				if h.game.buildCandidate != nil {
+					h.game.drawHandler.Remove(h.game.buildCandidate)
+				}
+
 				barricadeOnDestroyFn := func(b *barricade) {
 					b.game.drawHandler.Remove(b)
 					b.game.clickHandler.Remove(b)
