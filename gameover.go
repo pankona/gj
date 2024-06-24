@@ -20,6 +20,13 @@ func newGameover(g *Game) *gameover {
 
 func (g *gameover) OnClick(x, y int) bool {
 	// ゲームリセットする
+
+	g.game.Reset()
+
+	// ゲームオーバー画面を削除
+	g.game.clickHandler.Remove(g)
+	g.game.drawHandler.Remove(g)
+
 	return false
 }
 

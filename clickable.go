@@ -34,6 +34,10 @@ func (o *OnClickHandler) Remove(obj Clickable) {
 	}
 }
 
+func (o *OnClickHandler) Clear() {
+	o.clickableObjects = []Clickable{}
+}
+
 func (o *OnClickHandler) HandleClick(x, y int) {
 	for _, obj := range o.clickableObjects {
 		if obj.IsClicked(x, y) {

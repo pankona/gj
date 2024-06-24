@@ -236,6 +236,17 @@ func (g *Game) initialize() {
 	g.credit = 100
 }
 
+func (g *Game) Reset() {
+	g.clickHandler.Clear()
+	g.drawHandler.Clear()
+	g.updateHandler.Clear()
+	g.buildings = []Building{}
+	g.enemies = []Enemy{}
+
+	g.initialize()
+	g.SetBuildingPhase()
+}
+
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
