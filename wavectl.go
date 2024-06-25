@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -31,8 +30,6 @@ func (w *waveController) Update() {
 	w.spawnEnemy()
 	w.erapsedFrame++
 
-	// buildings から house を取得
-	// TODO: いちいちループ回すのは効率が悪いかも
 	if w.game.house.health <= 0 {
 		// ゲームオーバーの処理
 		gover := newGameover(w.game)
@@ -41,9 +38,11 @@ func (w *waveController) Update() {
 
 		// ウェーブ終了みたいなものなので自分を削除する
 		w.game.updateHandler.Remove(w)
-	}
+	} else if len(w.game.enemies) == 0 {
+		// enemies が 0 になるということは、small wave が終わったか、big wave が終わったということ
+		// TIPS: なので、ウェーブが始まったら最初のフレームでかならず enemies を 1 以上にすること。
+		// そうでないとウェーブがはじまった瞬間にウェーブが終わってしまう
 
-	if len(w.game.enemies) == 0 {
 		w.onWaveEnd()
 		w.erapsedFrame = 0
 		w.currentSmallWave = 0
@@ -51,10 +50,13 @@ func (w *waveController) Update() {
 
 		// ゲームクリアの処理
 		if w.currentBigWave == len(waveList) {
-			// TODO: implement
-			fmt.Println("Game Clear!")
+			gclear := newGameClear(w.game)
+			w.game.clickHandler.Add(gclear)
+			w.game.drawHandler.Add(gclear)
+
 		} else {
-			fmt.Println("Wave", w.currentBigWave)
+			// ウェーブ間の処理
+			// TODO: 必要ならなにか実装する
 		}
 
 		// ウェーブが終了したら自分自身を削除する
