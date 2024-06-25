@@ -36,6 +36,12 @@ func (w *waveController) Update() {
 		w.game.clickHandler.Add(gover)
 		w.game.drawHandler.Add(gover)
 
+		// 建物の Update() が呼ばれないようにする
+		// ゲームオーバー画面で攻撃を続けないようにするため
+		for _, b := range w.game.buildings {
+			w.game.updateHandler.Remove(b)
+		}
+
 		// ウェーブ終了みたいなものなので自分を削除する
 		w.game.updateHandler.Remove(w)
 	} else if len(w.game.enemies) == 0 {
