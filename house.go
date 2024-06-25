@@ -130,6 +130,8 @@ func (h *house) OnClick(x, y int) bool {
 					return false
 				}
 
+				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
+				// 選択肢なおしということ、いったん手放す
 				if h.game.buildCandidate != nil {
 					h.game.drawHandler.Remove(h.game.buildCandidate)
 				}
@@ -151,8 +153,13 @@ func (h *house) OnClick(x, y int) bool {
 
 				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostBarricadeBuild), x+width/2-30, y+height/2+40)
 
+				// 選択中であればボタンをハイライト表示する
+				if h.game.buildCandidate != nil {
+					drawYellowRect(screen, x, y, width, height)
+				}
+
+				// お金が足りないときはボタン全体をグレーアウトする
 				if h.game.credit < CostBarricadeBuild {
-					// お金が足りないときはボタン全体をグレーアウトする
 					overlay := ebiten.NewImage(width, height)
 					overlay.Fill(color.RGBA{128, 128, 128, 128})
 					overlayOpts := &ebiten.DrawImageOptions{}
@@ -169,6 +176,15 @@ func (h *house) OnClick(x, y int) bool {
 	}
 
 	return false
+}
+
+func drawYellowRect(screen *ebiten.Image, x, y, width, height int) {
+	strokeWidth := float32(10)
+	// 黄色っぽい線で描画
+	vector.StrokeLine(screen, float32(x), float32(y+5), float32(x+width), float32(y+5), strokeWidth, color.RGBA{0xff, 0xff, 0x00, 0xff}, true)
+	vector.StrokeLine(screen, float32(x+5), float32(y+5), float32(x+5), float32(y+height-5), strokeWidth, color.RGBA{0xff, 0xff, 0x00, 0xff}, true)
+	vector.StrokeLine(screen, float32(x+width-5), float32(y+5), float32(x+width-5), float32(y+height-5), strokeWidth, color.RGBA{0xff, 0xff, 0x00, 0xff}, true)
+	vector.StrokeLine(screen, float32(x), float32(y+height-5), float32(x+width), float32(y+height-5), strokeWidth, color.RGBA{0xff, 0xff, 0x00, 0xff}, true)
 }
 
 func (h *house) Health() int {
