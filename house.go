@@ -154,7 +154,7 @@ func (h *house) OnClick(x, y int) bool {
 				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostBarricadeBuild), x+width/2-30, y+height/2+40)
 
 				// 選択中であればボタンをハイライト表示する
-				if h.game.buildCandidate != nil {
+				if h.game.buildCandidate != nil && h.game.buildCandidate.Name() == "Barricade" {
 					drawYellowRect(screen, x, y, width, height)
 				}
 
@@ -169,6 +169,54 @@ func (h *house) OnClick(x, y int) bool {
 			})
 
 		h.game.infoPanel.AddButton(buildBarricadeButton)
+
+		buildTowerButton := newButton(h.game,
+			225+infoPanelHeight, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				if h.game.credit < CostTowerBuild {
+					// お金が足りない場合は建築できない
+					return false
+				}
+
+				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
+				// 選択肢なおしということ、いったん手放す
+				if h.game.buildCandidate != nil {
+					h.game.drawHandler.Remove(h.game.buildCandidate)
+				}
+
+				towerOnDestroyFn := func(b *tower) {
+					b.game.drawHandler.Remove(b)
+					b.game.clickHandler.Remove(b)
+					b.game.RemoveBuilding(b)
+					b.game.infoPanel.Remove(b)
+				}
+
+				h.game.buildCandidate = newTower(h.game, 0, 0, towerOnDestroyFn)
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				towerIcon := newTowerIcon(x+width/2, y+height/2-10)
+				towerIcon.Draw(screen)
+
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostTowerBuild), x+width/2-30, y+height/2+40)
+
+				// 選択中であればボタンをハイライト表示する
+				if h.game.buildCandidate != nil && h.game.buildCandidate.Name() == "Tower" {
+					drawYellowRect(screen, x, y, width, height)
+				}
+
+				// お金が足りないときはボタン全体をグレーアウトする
+				if h.game.credit < CostTowerBuild {
+					overlay := ebiten.NewImage(width, height)
+					overlay.Fill(color.RGBA{128, 128, 128, 128})
+					overlayOpts := &ebiten.DrawImageOptions{}
+					overlayOpts.GeoM.Translate(float64(x), float64(y))
+					screen.DrawImage(overlay, overlayOpts)
+				}
+			})
+		h.game.infoPanel.AddButton(buildTowerButton)
+
 	case PhaseWave:
 		// TODO: implement
 	default:

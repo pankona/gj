@@ -70,6 +70,7 @@ const (
 // コスト一覧
 const (
 	CostBarricadeBuild = 30
+	CostTowerBuild     = 30
 )
 
 const (
