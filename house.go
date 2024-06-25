@@ -221,6 +221,53 @@ func (h *house) OnClick(x, y int) bool {
 			})
 		h.game.infoPanel.AddButton(buildTowerButton)
 
+		buildRadioTowerButton := newButton(h.game,
+			225+infoPanelHeight*2, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				if h.game.credit < CostRadioTowerBuild {
+					// お金が足りない場合は建築できない
+					return false
+				}
+
+				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
+				// 選択肢なおしということ、いったん手放す
+				if h.game.buildCandidate != nil {
+					h.game.drawHandler.Remove(h.game.buildCandidate)
+				}
+
+				radioTowerOnDestroyFn := func(b *radioTower) {
+					b.game.drawHandler.Remove(b)
+					b.game.clickHandler.Remove(b)
+					b.game.RemoveBuilding(b)
+					b.game.infoPanel.Remove(b)
+				}
+
+				h.game.buildCandidate = newRadioTower(h.game, 0, 0, radioTowerOnDestroyFn)
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				radioTowerIcon := newRadioTowerIcon(x+width/2, y+height/2-10)
+				radioTowerIcon.Draw(screen)
+
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("BUILD ($%d)", CostRadioTowerBuild), x+width/2-30, y+height/2+40)
+
+				// 選択中であればボタンをハイライト表示する
+				if h.game.buildCandidate != nil && h.game.buildCandidate.Name() == "RadioTower" {
+					drawYellowRect(screen, x, y, width, height)
+				}
+
+				// お金が足りないときはボタン全体をグレーアウトする
+				if h.game.credit < CostRadioTowerBuild {
+					overlay := ebiten.NewImage(width, height)
+					overlay.Fill(color.RGBA{128, 128, 128, 128})
+					overlayOpts := &ebiten.DrawImageOptions{}
+					overlayOpts.GeoM.Translate(float64(x), float64(y))
+					screen.DrawImage(overlay, overlayOpts)
+				}
+			})
+		h.game.infoPanel.AddButton(buildRadioTowerButton)
+
 	case PhaseWave:
 		// TODO: implement
 	default:
