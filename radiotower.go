@@ -7,8 +7,10 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
+	"image/color"
 	_ "image/png"
 )
 
@@ -42,7 +44,7 @@ type radioTower struct {
 	isOverlapping bool
 }
 
-const radioTowerAttackCoolDown = 15
+const radioTowerAttackCoolDown = 30
 
 func newRadioTower(game *Game, x, y int, onDestroy func(b *radioTower)) *radioTower {
 	img, _, err := image.Decode(bytes.NewReader(radioTowerImageData))
@@ -59,7 +61,7 @@ func newRadioTower(game *Game, x, y int, onDestroy func(b *radioTower)) *radioTo
 		height: img.Bounds().Dy(),
 		scale:  1,
 
-		health: 100,
+		health: 50,
 
 		// 近すぎる敵は攻撃できない
 		// 最長攻撃可能距離と、最短攻撃可能距離を設定する
@@ -112,14 +114,15 @@ func (t *radioTower) Update() {
 			if distance < t.attackZoneRadius {
 				b := e.(Damager)
 				b.Damage(t.attackPower)
+
+				// エフェクトを描画する
+				eff := newRadioTowerAttackEffect(t.game, t.x, t.y, ex, ey, t.attackZoneRadius)
+				t.game.drawHandler.Add(eff)
 			}
 		}
 
 		t.cooldown = radioTowerAttackCoolDown
 
-		// エフェクトを描画する
-		eff := newRadioTowerAttackEffect(t.game, t.x, t.y)
-		t.game.drawHandler.Add(eff)
 	}
 
 	if t.cooldown > 0 {
@@ -131,26 +134,33 @@ func (t *radioTower) Update() {
 type radioTowerAttackEffect struct {
 	game *Game
 
-	x, y  int
-	width int
+	tx, ty int
+	ex, ey int
+	radius float64
 
 	// 何フレーム後に消えるか
 	displayTime int
 }
 
-func newRadioTowerAttackEffect(game *Game, x, y int) *radioTowerAttackEffect {
+func newRadioTowerAttackEffect(game *Game, tx, ty, ex, ey int, radius float64) *radioTowerAttackEffect {
 	return &radioTowerAttackEffect{
 		game:        game,
-		x:           x,
-		y:           y,
-		width:       7,
-		displayTime: 10,
+		tx:          tx,
+		ty:          ty,
+		ex:          ex,
+		ey:          ey,
+		radius:      radius,
+		displayTime: 20,
 	}
 }
 
 func (b *radioTowerAttackEffect) Draw(screen *ebiten.Image) {
 	if b.displayTime >= 0 {
-		// TODO: implement
+		// t.x, t.y から e.x, e.y に向かってビームを描画する
+		vector.StrokeLine(screen, float32(b.tx), float32(b.ty), float32(b.ex), float32(b.ey), 10, color.RGBA{R: 128, G: 128, B: 128, A: 128}, true)
+		// 攻撃範囲を描画
+		vector.DrawFilledCircle(screen, float32(b.ex), float32(b.ey), float32(b.radius), color.RGBA{R: 128, G: 128, B: 128, A: 128}, true)
+
 		b.displayTime--
 	}
 

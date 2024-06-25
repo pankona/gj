@@ -59,7 +59,7 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 		height: img.Bounds().Dy(),
 		scale:  1,
 
-		health:      100,
+		health:      70,
 		attackRange: 300,
 		attackPower: 2,
 
