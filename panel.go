@@ -88,6 +88,9 @@ func (p *infoPanel) Draw(screen *ebiten.Image) {
 	vector.StrokeLine(screen, float32(p.x+p.width), float32(p.y), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
 	vector.StrokeLine(screen, float32(p.x), float32(p.y+p.height), float32(p.x+p.width), float32(p.y+p.height), strokeWidth, color.White, true)
 
+	// 枠の中を塗りつぶす
+	vector.DrawFilledRect(screen, float32(p.x), float32(p.y), float32(p.width), float32(p.height), color.RGBA{0, 0x45, 0, 0x90}, true)
+
 	// TODO: アイコンを描画
 
 	// ユニット名とHPを描画
