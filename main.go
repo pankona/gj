@@ -69,8 +69,9 @@ const (
 
 // コスト一覧
 const (
-	CostBarricadeBuild = 30
-	CostTowerBuild     = 50
+	CostBarricadeBuild  = 30
+	CostTowerBuild      = 50
+	CostRadioTowerBuild = 70
 )
 
 const (

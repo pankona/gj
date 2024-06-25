@@ -59,7 +59,7 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 		height: img.Bounds().Dy(),
 		scale:  1,
 
-		health:      100,
+		health:      70,
 		attackRange: 300,
 		attackPower: 2,
 
@@ -94,12 +94,13 @@ func (t *tower) Update() {
 
 	// クールダウンが明けていて、かつ攻撃範囲に入っていれば攻撃する
 	if t.cooldown == 0 && nearestEnemy != nil && nearestDistance < t.attackRange {
-		b := nearestEnemy.(*bug)
+		bx, by := nearestEnemy.Position()
+		b := nearestEnemy.(Damager)
 		b.Damage(t.attackPower)
 		t.cooldown = towerAttackCoolDown
 
 		// ビームを描画する
-		bm := newBeam(t.game, t.x, t.y, b.x, b.y)
+		bm := newBeam(t.game, t.x, t.y, bx, by)
 		t.game.drawHandler.Add(bm)
 	}
 
