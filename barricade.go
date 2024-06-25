@@ -60,6 +60,10 @@ func newBarricade(game *Game, x, y int, onDestroy func(b *barricade)) *barricade
 	return h
 }
 
+func (b *barricade) Update() {
+	// 何もしない
+}
+
 // 画面中央に配置
 func (b *barricade) Draw(screen *ebiten.Image) {
 	// 画像を描画

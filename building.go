@@ -13,6 +13,7 @@ type Building interface {
 
 	Clickable
 	Drawable
+	Updater
 }
 
 func (g *Game) AddBuilding(b Building) {

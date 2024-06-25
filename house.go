@@ -67,6 +67,10 @@ func newHouse(game *Game) *house {
 	return h
 }
 
+func (h *house) Update() {
+	// 何もしない
+}
+
 // 画面中央に配置
 func (h *house) Draw(screen *ebiten.Image) {
 	// 画像を描画

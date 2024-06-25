@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -22,7 +24,10 @@ type tower struct {
 	zindex        int
 	image         *ebiten.Image
 
-	health int
+	health      int
+	attackRange float64
+	attackPower int
+	cooldown    int
 
 	// 画像の拡大率。
 	// 1以外を指定する場合は元画像のサイズをそもそも変更できないか検討すること
@@ -50,7 +55,9 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 		height: img.Bounds().Dy(),
 		scale:  1,
 
-		health: 100,
+		health:      100,
+		attackRange: 100,
+		attackPower: 10,
 
 		image: ebiten.NewImageFromImage(img),
 
@@ -58,6 +65,40 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 	}
 
 	return h
+}
+
+func (t *tower) Update() {
+	if t.game.phase == PhaseBuilding {
+		// do nothing
+		return
+	}
+
+	// 敵が攻撃範囲に入ってきたら攻撃する
+	// 複数の敵が攻撃範囲に入ってきた場合は、最も近い敵を攻撃する
+
+	// 最寄りの敵を探す
+	var nearestEnemy Enemy
+	nearestDistance := math.MaxFloat64
+	for _, e := range t.game.enemies {
+		ex, ey := e.Position()
+		distance := math.Sqrt(math.Pow(float64(t.x-ex), 2) + math.Pow(float64(t.y-ey), 2))
+		if distance < nearestDistance {
+			nearestEnemy = e
+			nearestDistance = distance
+		}
+	}
+
+	// クールダウンが明けていて、かつ攻撃範囲に入っていれば攻撃する
+	if t.cooldown == 0 && nearestEnemy != nil && nearestDistance < t.attackRange {
+		b := nearestEnemy.(*bug)
+		b.Damage(10)
+		t.cooldown = 60
+		fmt.Println("tower attack")
+	}
+
+	if t.cooldown > 0 {
+		t.cooldown--
+	}
 }
 
 // 画面中央に配置
