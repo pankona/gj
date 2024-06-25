@@ -2,14 +2,15 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"log"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
+	"image/color"
 	_ "image/png"
 )
 
@@ -28,6 +29,7 @@ type tower struct {
 	attackRange float64
 	attackPower int
 	cooldown    int
+	erapsedTime int // 攻撃実行からの経過時間
 
 	// 画像の拡大率。
 	// 1以外を指定する場合は元画像のサイズをそもそも変更できないか検討すること
@@ -39,6 +41,8 @@ type tower struct {
 	// この建物が他の建物と重なっているかどうか (建築確定前に用いるフラグ)
 	isOverlapping bool
 }
+
+const towerAttackCoolDown = 15
 
 func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 	img, _, err := image.Decode(bytes.NewReader(towerImageData))
@@ -56,8 +60,8 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 		scale:  1,
 
 		health:      100,
-		attackRange: 100,
-		attackPower: 10,
+		attackRange: 300,
+		attackPower: 2,
 
 		image: ebiten.NewImageFromImage(img),
 
@@ -91,14 +95,56 @@ func (t *tower) Update() {
 	// クールダウンが明けていて、かつ攻撃範囲に入っていれば攻撃する
 	if t.cooldown == 0 && nearestEnemy != nil && nearestDistance < t.attackRange {
 		b := nearestEnemy.(*bug)
-		b.Damage(10)
-		t.cooldown = 60
-		fmt.Println("tower attack")
+		b.Damage(t.attackPower)
+		t.cooldown = towerAttackCoolDown
+
+		// ビームを描画する
+		bm := newBeam(t.game, t.x, t.y, b.x, b.y)
+		t.game.drawHandler.Add(bm)
 	}
 
 	if t.cooldown > 0 {
 		t.cooldown--
 	}
+}
+
+// タワーから発射されるビームを描画するための構造体
+type beam struct {
+	game *Game
+
+	startX, startY int
+	endX, endY     int
+	width          int
+
+	// 何フレーム後に消えるか
+	displayTime int
+}
+
+func newBeam(game *Game, startX, startY, endX, endY int) *beam {
+	return &beam{
+		game:        game,
+		startX:      startX,
+		startY:      startY,
+		endX:        endX,
+		endY:        endY,
+		width:       7,
+		displayTime: 10,
+	}
+}
+
+func (b *beam) Draw(screen *ebiten.Image) {
+	if b.displayTime >= 0 {
+		vector.StrokeLine(screen, float32(b.startX), float32(b.startY), float32(b.endX), float32(b.endY), float32(b.width), color.RGBA{255, 255, 0, 128}, true)
+		b.displayTime--
+	}
+
+	if b.displayTime <= 0 {
+		b.game.drawHandler.Remove(b)
+	}
+}
+
+func (b *beam) ZIndex() int {
+	return 110
 }
 
 // 画面中央に配置
