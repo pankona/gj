@@ -44,6 +44,9 @@ type bug struct {
 	attackDuration       int
 	originalX, originalY int
 
+	// 死亡時のアニメーションを管理するための変数
+	deadAnimationDuration int
+
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
@@ -86,7 +89,7 @@ func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bu
 		y:         y,
 		width:     bugImage.Bounds().Dx(),
 		height:    bugImage.Bounds().Dy(),
-		zindex:    200,
+		zindex:    50,
 		image:     bugImage,
 		selfColor: bugColor,
 
@@ -142,6 +145,14 @@ func greenBug() image.Rectangle {
 }
 
 func (b *bug) Update() {
+	if b.health <= 0 {
+		b.deadAnimationDuration++
+		if b.deadAnimationDuration >= 30 {
+			b.onDestroy(b)
+		}
+		return
+	}
+
 	switch b.selfColor {
 	case bugsRed:
 		redBugUpdate(b)
@@ -234,7 +245,6 @@ func (b *bug) Damage(d int) {
 
 	if b.health <= 0 {
 		b.health = 0
-		b.onDestroy(b)
 	}
 }
 
@@ -588,8 +598,22 @@ func (b *bug) Size() (int, int) {
 // 画面中央に配置
 func (b *bug) Draw(screen *ebiten.Image) {
 	// 画像を描画
+
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(b.scale, b.scale)
+	if b.health <= 0 {
+		// 死亡時のアニメーションを行う
+		// ぺちゃんこになるように縮小する
+		scale := 1.0 - float64(b.deadAnimationDuration)/15
+		if scale < 0 {
+			scale = 0
+		}
+
+		opts.GeoM.Translate(0, float64(-b.height)/2)
+		opts.GeoM.Scale(1, scale)
+		opts.GeoM.Translate(0, float64(b.height)/2)
+	} else {
+		opts.GeoM.Scale(b.scale, b.scale)
+	}
 	opts.GeoM.Translate(float64(b.x)-float64(b.width)*b.scale/2, float64(b.y)-float64(b.height)*b.scale/2)
 	screen.DrawImage(b.image, opts)
 }
