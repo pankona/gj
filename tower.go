@@ -35,6 +35,9 @@ type tower struct {
 	// 1以外を指定する場合は元画像のサイズをそもそも変更できないか検討すること
 	scale float64
 
+	// 死亡時のアニメーションを管理するための変数
+	deadAnimationDuration int
+
 	// health が 0 になったときに呼ばれる関数
 	onDestroy func(b *tower)
 
@@ -74,6 +77,15 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 func (t *tower) Update() {
 	if t.game.phase == PhaseBuilding {
 		// do nothing
+		return
+	}
+
+	// 死亡時のアニメーションを再生する
+	if t.health <= 0 {
+		t.deadAnimationDuration++
+		if t.deadAnimationDuration >= deadAnimationTotalFrame {
+			t.onDestroy(t)
+		}
 		return
 	}
 
@@ -152,7 +164,22 @@ func (b *beam) ZIndex() int {
 func (b *tower) Draw(screen *ebiten.Image) {
 	// 画像を描画
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(b.scale, b.scale)
+
+	if b.health <= 0 {
+		// 死亡時のアニメーションを行う
+		// ぺちゃんこになるように縮小する
+		scale := 1.0 - float64(b.deadAnimationDuration)/deadAnimationTotalFrame
+		if scale < 0 {
+			scale = 0
+		}
+
+		opts.GeoM.Translate(0, float64(-b.height))
+		opts.GeoM.Scale(1, scale)
+		opts.GeoM.Translate(0, float64(b.height))
+	} else {
+		opts.GeoM.Scale(b.scale, b.scale)
+	}
+
 	opts.GeoM.Translate(float64(b.x)-float64(b.width)*b.scale/2, float64(b.y)-float64(b.height)*b.scale/2)
 
 	// 他の建物と重なっている場合は赤くする
@@ -195,7 +222,6 @@ func (b *tower) Damage(d int) {
 	b.health -= d
 	if b.health <= 0 {
 		b.health = 0
-		b.onDestroy(b)
 	}
 }
 

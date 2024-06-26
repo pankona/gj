@@ -61,6 +61,10 @@ const (
 	bugsGreen
 )
 
+const (
+	deadAnimationTotalFrame = 10
+)
+
 func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bug {
 	img, _, err := image.Decode(bytes.NewReader(bugsImageData))
 	if err != nil {
@@ -147,7 +151,7 @@ func greenBug() image.Rectangle {
 func (b *bug) Update() {
 	if b.health <= 0 {
 		b.deadAnimationDuration++
-		if b.deadAnimationDuration >= 30 {
+		if b.deadAnimationDuration >= deadAnimationTotalFrame {
 			b.onDestroy(b)
 		}
 		return
@@ -598,12 +602,11 @@ func (b *bug) Size() (int, int) {
 // 画面中央に配置
 func (b *bug) Draw(screen *ebiten.Image) {
 	// 画像を描画
-
 	opts := &ebiten.DrawImageOptions{}
 	if b.health <= 0 {
 		// 死亡時のアニメーションを行う
 		// ぺちゃんこになるように縮小する
-		scale := 1.0 - float64(b.deadAnimationDuration)/15
+		scale := 1.0 - float64(b.deadAnimationDuration)/deadAnimationTotalFrame
 		if scale < 0 {
 			scale = 0
 		}
