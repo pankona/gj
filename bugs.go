@@ -332,7 +332,16 @@ func greenBugUpdate(b *bug) {
 }
 
 func (b *bug) Name() string {
-	return b.name
+	switch b.selfColor {
+	case bugsRed:
+		return "Red bug"
+	case bugsBlue:
+		return "Blue bug"
+	case bugsGreen:
+		return "Green bug"
+	}
+	log.Fatal("invalid bug color")
+	return ""
 }
 
 func (b *bug) Position() (int, int) {
