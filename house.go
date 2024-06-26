@@ -190,6 +190,7 @@ func (h *house) OnClick(x, y int) bool {
 				}
 
 				towerOnDestroyFn := func(b *tower) {
+					b.game.updateHandler.Remove(b)
 					b.game.drawHandler.Remove(b)
 					b.game.clickHandler.Remove(b)
 					b.game.RemoveBuilding(b)
@@ -237,6 +238,7 @@ func (h *house) OnClick(x, y int) bool {
 				}
 
 				radioTowerOnDestroyFn := func(b *radioTower) {
+					b.game.updateHandler.Remove(b)
 					b.game.drawHandler.Remove(b)
 					b.game.clickHandler.Remove(b)
 					b.game.RemoveBuilding(b)
