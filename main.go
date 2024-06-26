@@ -185,6 +185,7 @@ func (g *Game) initialize() {
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
 	g.house = newHouse(g)
+	g.updateHandler.Add(g.house)
 	g.drawHandler.Add(g.house)
 	g.AddBuilding(g.house)
 	g.clickHandler.Add(g.house)
