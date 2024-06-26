@@ -235,7 +235,96 @@ func redBugUpdate(b *bug) {
 }
 
 func blueBugUpdate(b *bug) {
-	// todo: implement
+	// 青虫の特徴
+	// 最寄りの障害物に向かって進む。障害物にぶつかったら、ぶつかったものに対して攻撃を行う。
+	// 攻撃は一定時間ごとに行う。攻撃機範囲はせまい。自身の周囲ちょっとくらい (赤虫と同じ)。
+	// 体力は赤虫よりもちょっと多い。
+	// 赤虫より多く出現する。
+	// 動きの速さは普通。
+
+	// 最寄りの障害物を探す
+	var nearestBuilding Damager
+	nearestDistance := math.MaxFloat64
+	for _, building := range b.game.buildings {
+		x, y := building.Position()
+		// 対象の建物と bug の距離を計算
+		dx := x - b.x
+		dy := y - b.y
+		distance := math.Sqrt(float64(dx*dx + dy*dy))
+		if distance < nearestDistance {
+			nearestDistance = distance
+			nearestBuilding = building.(Damager)
+		}
+	}
+
+	// 最寄りの建物が攻撃範囲内にあるか確認
+
+	// 対象の建物と bugs の攻撃範囲を踏まえた当たり判定を行う
+	// bugs は size + attackRange の範囲を当たり判定として用いる
+	target := nearestBuilding.(Building)
+	x, y := target.Position()
+	width, height := target.Size()
+	var attackTarget Damager
+	if intersects(
+		// bug
+		rect{
+			b.x - b.width/2 - int(b.attackRange), b.y - b.height/2 - int(b.attackRange),
+			b.width + int(b.attackRange)*2, b.height + int(b.attackRange)*2,
+		},
+		// building
+		rect{x - width/2, y - height/2,
+			width, height},
+	) {
+		// 攻撃射程圏内であるので、その建物を attack 対象にする
+		attackTarget = nearestBuilding
+	}
+
+	if attackTarget != nil {
+		// クールダウン中でなければ攻撃
+		if b.attackCooldown <= 0 {
+			b.attack(nearestBuilding)
+			b.attackCooldown = 60
+		} else {
+			// クールダウンを消化する
+			b.attackCooldown -= 1
+		}
+
+		// クールダウン中でかつ攻撃対象が攻撃範囲内にいるときにはその場にとどまる
+		return
+	}
+
+	// 最寄りの建物に向かって移動
+	moveTargetX, moveTargetY := nearestBuilding.(Building).Position()
+
+	// ターゲットへの直線距離を計算
+	dx := moveTargetX - b.x
+	dy := moveTargetY - b.y
+
+	// 移動方向のラジアンを計算
+	angle := math.Atan2(float64(dy), float64(dx))
+
+	// 回避動作
+	// 虫同士がぴったり重ならないようにするための計算
+	// やや自信のないロジックではある
+	avoidX, avoidY := 0.0, 0.0
+	for _, e := range b.game.enemies {
+		ee := e.(*bug)
+		if ee != b {
+			distX := float64(ee.x - b.x)
+			distY := float64(ee.y - b.y)
+			distance := math.Sqrt(distX*distX + distY*distY)
+			if distance > 0 && distance < float64(b.width) {
+				avoidX -= distX / distance
+				avoidY -= distY / distance
+			}
+		}
+	}
+
+	// 移動
+	moveX := math.Cos(angle)*b.speed + avoidX
+	moveY := math.Sin(angle)*b.speed + avoidY
+	b.x += int(moveX)
+	b.y += int(moveY)
 }
 
 func greenBugUpdate(b *bug) {

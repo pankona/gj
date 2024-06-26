@@ -99,7 +99,7 @@ func generateSpawnInfos(num int) []spawnInfo {
 		}
 
 		infos = append(infos, spawnInfo{
-			color: bugsRed,
+			color: bugsBlue,
 			x:     x,
 			y:     y,
 		})
