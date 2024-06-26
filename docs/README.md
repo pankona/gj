@@ -5,6 +5,11 @@
 - ChatGPT で絵を描いてもらう
 - [イラストエイトさん](https://illust8.com/contents/3731)
   - バリケードや手のひらの絵
+- 効果音
+  - ポケットサウンド – https://pocket-se.info/
+  - 魔王魂 - https://maou.audio
+  - 効果音ラボ - https://soundeffect-lab.info
+  - Howling-Indicator - https://howlingindicator.net
  
 ## スプライトをクリックしたらコールバックする
 
