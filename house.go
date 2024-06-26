@@ -57,6 +57,7 @@ func newHouse(game *Game) *house {
 			// TODO: 爆発したり消えたりする処理を書く
 			// ここでフラグを設定しといて、Update() や Draw で続きの処理を行うのもあり
 			// いったんシンプルに消す
+			h.game.RemoveBuilding(h)
 			h.game.drawHandler.Remove(h)
 		},
 	}
