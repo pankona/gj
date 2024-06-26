@@ -134,7 +134,6 @@ func (t *radioTower) Update() {
 		}
 
 		t.cooldown = radioTowerAttackCoolDown
-
 	}
 
 	if t.cooldown > 0 {

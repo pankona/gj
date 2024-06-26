@@ -89,6 +89,11 @@ func (t *tower) Update() {
 		return
 	}
 
+	// 家が壊れていたらもはや攻撃をやめる
+	if t.game.house.health <= 0 {
+		return
+	}
+
 	// 敵が攻撃範囲に入ってきたら攻撃する
 	// 複数の敵が攻撃範囲に入ってきた場合は、最も近い敵を攻撃する
 

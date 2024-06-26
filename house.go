@@ -28,6 +28,9 @@ type house struct {
 
 	health int
 
+	// 死亡時のアニメーションを管理するための変数
+	deadAnimationDuration int
+
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
@@ -57,6 +60,7 @@ func newHouse(game *Game) *house {
 			// TODO: 爆発したり消えたりする処理を書く
 			// ここでフラグを設定しといて、Update() や Draw で続きの処理を行うのもあり
 			// いったんシンプルに消す
+			h.game.updateHandler.Remove(h)
 			h.game.RemoveBuilding(h)
 			h.game.drawHandler.Remove(h)
 		},
@@ -69,14 +73,35 @@ func newHouse(game *Game) *house {
 }
 
 func (h *house) Update() {
-	// 何もしない
+	if h.health <= 0 {
+		h.deadAnimationDuration++
+		if h.deadAnimationDuration >= deadAnimationTotalFrame {
+			h.onDestroy(h)
+		}
+		return
+	}
 }
 
 // 画面中央に配置
 func (h *house) Draw(screen *ebiten.Image) {
 	// 画像を描画
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(h.scale, h.scale)
+	if h.health <= 0 {
+		// 死亡時のアニメーションを行う
+		// ぺちゃんこになるように縮小する
+		// TODO: ちょっとアニメーションが怪しいので調整する
+		scale := h.scale * (1.0 - float64(h.deadAnimationDuration)/deadAnimationTotalFrame)
+		if scale < 0 {
+			scale = 0
+		}
+
+		opts.GeoM.Translate(0, h.scale*float64(-h.height)/2)
+		opts.GeoM.Scale(h.scale, scale)
+		opts.GeoM.Translate(0, h.scale*float64(h.height)/2)
+	} else {
+		opts.GeoM.Scale(h.scale, h.scale)
+	}
+
 	opts.GeoM.Translate(float64(h.x)-float64(h.width)*h.scale/2, float64(h.y)-float64(h.height)*h.scale/2)
 	screen.DrawImage(h.image, opts)
 }
@@ -111,7 +136,6 @@ func (h *house) Damage(d int) {
 	h.health -= d
 	if h.health <= 0 {
 		h.health = 0
-		h.onDestroy(h)
 	}
 }
 
