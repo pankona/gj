@@ -38,6 +38,12 @@ type bug struct {
 	// 初期化時に設定するものではなく、攻撃後に設定するもの
 	attackCooldown int
 
+	// 攻撃中であるかどうかを示すフラグと攻撃アニメーションの時間
+	// 攻撃アニメーションを行うために用いる
+	attacking            bool
+	attackDuration       int
+	originalX, originalY int
+
 	// 画像の拡大率。
 	// TODO: 本当は画像のサイズそのものを変更したほうが見た目も処理効率も良くなる。余裕があれば後々やろう。
 	scale float64
@@ -80,6 +86,7 @@ func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bu
 		y:         y,
 		width:     bugImage.Bounds().Dx(),
 		height:    bugImage.Bounds().Dy(),
+		zindex:    200,
 		image:     bugImage,
 		selfColor: bugColor,
 
@@ -275,9 +282,30 @@ func redBugUpdate(b *bug) {
 		if b.attackCooldown <= 0 {
 			b.attack(attackTarget)
 			b.attackCooldown = 60
+
+			b.attacking = true
+			b.attackDuration = 7
+			b.originalX, b.originalY = b.x, b.y
 		} else {
 			// クールダウンを消化する
 			b.attackCooldown -= 1
+		}
+
+		// 攻撃中であればアニメーション動作を行う
+		if b.attacking {
+			b.attackDuration--
+			if b.attackDuration <= 0 {
+				b.x = b.originalX
+				b.y = b.originalY
+				b.attacking = false
+			} else {
+				// 攻撃対象に向かって一瞬スプライトを移動させる
+				targetX, targetY := attackTarget.(Building).Position()
+				dx := (targetX - b.x) / 4
+				dy := (targetY - b.y) / 4
+				b.x += dx / b.attackDuration
+				b.y += dy / b.attackDuration
+			}
 		}
 
 		return
@@ -385,9 +413,30 @@ func blueBugUpdate(b *bug) {
 		if b.attackCooldown <= 0 {
 			b.attack(nearestBuilding)
 			b.attackCooldown = 60
+
+			b.attacking = true
+			b.attackDuration = 7
+			b.originalX, b.originalY = b.x, b.y
 		} else {
 			// クールダウンを消化する
 			b.attackCooldown -= 1
+		}
+
+		// 攻撃中であればアニメーション動作を行う
+		if b.attacking {
+			b.attackDuration--
+			if b.attackDuration <= 0 {
+				b.x = b.originalX
+				b.y = b.originalY
+				b.attacking = false
+			} else {
+				// 攻撃対象に向かって一瞬スプライトを移動させる
+				targetX, targetY := attackTarget.(Building).Position()
+				dx := (targetX - b.x) / 4
+				dy := (targetY - b.y) / 4
+				b.x += dx / b.attackDuration
+				b.y += dy / b.attackDuration
+			}
 		}
 
 		// クールダウン中でかつ攻撃対象が攻撃範囲内にいるときにはその場にとどまる
