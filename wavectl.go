@@ -98,11 +98,14 @@ func generateSpawnInfos(num int) []spawnInfo {
 			y = rand.Intn(screenHeight)
 		}
 
-		// 赤虫:青虫 = 4:6 で生成する
-		if rand.Intn(10) < 4 {
+		// 赤虫:青虫:緑 = 3:5:2 で生成する
+		r := rand.Intn(10)
+		if r < 3 {
 			infos = append(infos, spawnInfo{bugsRed, x, y})
-		} else {
+		} else if r < 8 {
 			infos = append(infos, spawnInfo{bugsBlue, x, y})
+		} else {
+			infos = append(infos, spawnInfo{bugsGreen, x, y})
 		}
 	}
 

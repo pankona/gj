@@ -7,8 +7,10 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
+	"image/color"
 	_ "image/png"
 )
 
@@ -71,7 +73,7 @@ func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bu
 	}()
 	bugImage := bugsImage.SubImage(rect).(*ebiten.Image)
 
-	return &bug{
+	bug := &bug{
 		game: game,
 
 		x:         x,
@@ -93,6 +95,31 @@ func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bu
 
 		onDestroy: onDestroy,
 	}
+
+	switch bugColor {
+	case bugsRed:
+		bug.speed = 5
+		bug.attackPower = 1
+		bug.attackRange = 1
+		bug.health = 2
+		bug.name = "Red bug"
+	case bugsBlue:
+		bug.speed = 4
+		bug.attackPower = 1
+		bug.attackRange = 1
+		bug.health = 3
+		bug.name = "Blue bug"
+	case bugsGreen:
+		bug.speed = 3
+		bug.attackPower = 1
+		bug.attackRange = 50
+		bug.health = 4
+		bug.name = "Green bug"
+	default:
+		log.Fatal("invalid bug color")
+	}
+
+	return bug
 }
 
 func redBug() image.Rectangle {
@@ -122,6 +149,69 @@ func (b *bug) Update() {
 
 func (b *bug) attack(a Damager) {
 	a.Damage(b.attackPower)
+
+	// エフェクトを表示する
+	switch b.selfColor {
+	case bugsRed:
+		// TODO: implement
+	case bugsBlue:
+		// TODO: implement
+	case bugsGreen:
+		tx, ty := a.(Building).Position()
+		e := newGreenBugAttackEffect(b.game, b.x, b.y, tx, ty)
+		b.game.updateHandler.Add(e)
+		b.game.drawHandler.Add(e)
+	}
+}
+
+type greenBugAttackEffect struct {
+	game *Game
+
+	currentX, currentY int
+	startX, startY     int
+	targetX, targetY   int
+
+	erapsedFrame int
+
+	zindex int
+}
+
+func newGreenBugAttackEffect(game *Game, startX, startY, targetX, targetY int) *greenBugAttackEffect {
+	return &greenBugAttackEffect{
+		game: game,
+
+		currentX: startX,
+		currentY: startY,
+		startX:   startX,
+		startY:   startY,
+		targetX:  targetX,
+		targetY:  targetY,
+
+		zindex: 220,
+	}
+}
+
+func (e *greenBugAttackEffect) Update() {
+	// 攻撃エフェクトを描画する
+	// 直線上に移動するエフェクトを描画する
+	// 30 frame かけて target に向かって移動する
+	e.currentX = e.startX + (e.targetX-e.startX)*e.erapsedFrame/30
+	e.currentY = e.startY + (e.targetY-e.startY)*e.erapsedFrame/30
+	if e.erapsedFrame <= 30 {
+		e.erapsedFrame++
+		return
+	}
+	e.game.updateHandler.Remove(e)
+	e.game.drawHandler.Remove(e)
+}
+
+func (e *greenBugAttackEffect) Draw(screen *ebiten.Image) {
+	// 直線上に移動するエフェクトを描画する
+	vector.StrokeLine(screen, float32(e.startX), float32(e.startY), float32(e.currentX), float32(e.currentY), 10, color.RGBA{R: 128, G: 128, B: 128, A: 128}, true)
+}
+
+func (e *greenBugAttackEffect) ZIndex() int {
+	return e.zindex
 }
 
 type Damager interface {
@@ -195,12 +285,19 @@ func redBugUpdate(b *bug) {
 
 	// house に向かう
 	var moveTargetX, moveTargetY int
+	var found bool
 
 	for _, building := range b.game.buildings {
 		if building.Name() == "House" {
 			moveTargetX, moveTargetY = building.Position()
+			found = true
 			break
 		}
+	}
+
+	if !found {
+		// すべての建物が破壊されている場合はその場にとどまる
+		return
 	}
 
 	// ターゲットへの直線距離を計算
@@ -261,6 +358,10 @@ func blueBugUpdate(b *bug) {
 
 	// 対象の建物と bugs の攻撃範囲を踏まえた当たり判定を行う
 	// bugs は size + attackRange の範囲を当たり判定として用いる
+	if nearestBuilding == nil {
+		// すべての建物が破壊されている場合はその場にとどまる
+		return
+	}
 	target := nearestBuilding.(Building)
 	x, y := target.Position()
 	width, height := target.Size()
@@ -328,20 +429,103 @@ func blueBugUpdate(b *bug) {
 }
 
 func greenBugUpdate(b *bug) {
-	// todo: implement
+	// 緑虫の特徴
+	// 家に向かって一直線に進む。
+	// 攻撃は一定時間ごとに行う。攻撃範囲が広い。飛び道具のようなものを放つ。
+	// 攻撃範囲に任意の障害物が入ったとき、その障害物に向かって攻撃を行う。
+	// 体力は青虫よりも多い。
+	// 出現頻度は低い。
+	// 動きは遅い。
+
+	// target に向かう途中に障害物が攻撃射程に入ったとき、その障害物を target とする
+	// いずれかの建物が攻撃レンジに入っているか確認
+	var attackTarget Damager
+	for _, building := range b.game.buildings {
+		x, y := building.Position()
+		width, height := building.Size()
+
+		// 対象の建物と bugs の攻撃範囲を踏まえた当たり判定を行う
+		// bugs は size + attackRange の範囲を当たり判定として用いる
+		if intersects(
+			// bug
+			rect{
+				b.x - b.width/2 - int(b.attackRange), b.y - b.height/2 - int(b.attackRange),
+				b.width + int(b.attackRange)*2, b.height + int(b.attackRange)*2,
+			},
+			// building
+			rect{x - width/2, y - height/2,
+				width, height},
+		) {
+			// 攻撃射程圏内であるので、その建物を attack 対象にする
+			attackTarget = building.(Damager)
+
+			break
+		}
+	}
+
+	// attack target がいるならば攻撃する。そうでないならば house に向かう
+	if attackTarget != nil {
+		// クールダウン中でなければ攻撃
+		if b.attackCooldown <= 0 {
+			b.attack(attackTarget)
+			b.attackCooldown = 60
+		} else {
+			// クールダウンを消化する
+			b.attackCooldown -= 1
+		}
+
+		return
+	}
+
+	// house に向かう
+	var moveTargetX, moveTargetY int
+	var found bool
+	for _, building := range b.game.buildings {
+		if building.Name() == "House" {
+			moveTargetX, moveTargetY = building.Position()
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// すべての建物が破壊されている場合はその場にとどまる
+		return
+	}
+
+	// ターゲットへの直線距離を計算
+	dx := moveTargetX - b.x
+	dy := moveTargetY - b.y
+
+	// 移動方向のラジアンを計算
+	angle := math.Atan2(float64(dy), float64(dx))
+
+	// 回避動作
+	// 虫同士がぴったり重ならないようにするための計算
+	// やや自信のないロジックではある
+	avoidX, avoidY := 0.0, 0.0
+	for _, e := range b.game.enemies {
+		ee := e.(*bug)
+		if ee != b {
+			distX := float64(ee.x - b.x)
+			distY := float64(ee.y - b.y)
+			distance := math.Sqrt(distX*distX + distY*distY)
+			if distance > 0 && distance < float64(b.width) {
+				avoidX -= distX / distance
+				avoidY -= distY / distance
+			}
+		}
+	}
+
+	// 移動
+	moveX := math.Cos(angle)*b.speed + avoidX
+	moveY := math.Sin(angle)*b.speed + avoidY
+	b.x += int(moveX)
+	b.y += int(moveY)
 }
 
 func (b *bug) Name() string {
-	switch b.selfColor {
-	case bugsRed:
-		return "Red bug"
-	case bugsBlue:
-		return "Blue bug"
-	case bugsGreen:
-		return "Green bug"
-	}
-	log.Fatal("invalid bug color")
-	return ""
+	return b.name
 }
 
 func (b *bug) Position() (int, int) {
