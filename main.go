@@ -83,6 +83,7 @@ const (
 )
 
 func (g *Game) Update() error {
+
 	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
 	// これをやると登録された Clickable の OnClick が呼ばれる
 	if x, y, clicked := getClickedPosition(); clicked {
@@ -134,6 +135,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		vector.DrawFilledRect(screen, screenWidth/2, eScreenHeight/2, 1, 1, color.RGBA{255, 255, 255, 255}, true)
 		// 残りの敵の数を表示
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Enemies: %d", len(g.enemies)), 0, 120)
+
+		// FPS を表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("FPS: %0.2f", ebiten.ActualFPS()), 0, 140)
+
+		// active な audio の数を表示
+		var activeAudioNum int
+		for _, aplayer := range getAudioPlayer().players {
+			if aplayer.IsPlaying() {
+				activeAudioNum++
+			}
+		}
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Active Audio: %d", activeAudioNum), 0, 160)
 	}
 }
 
@@ -184,6 +197,9 @@ func (g *Game) SetWavePhase() {
 func (g *Game) initialize() {
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
+	aplayer := getAudioPlayer()
+	aplayer.playBGM()
+
 	g.house = newHouse(g)
 	g.updateHandler.Add(g.house)
 	g.drawHandler.Add(g.house)

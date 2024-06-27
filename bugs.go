@@ -172,13 +172,15 @@ func (b *bug) Update() {
 func (b *bug) attack(a Damager) {
 	a.Damage(b.attackPower)
 
-	// エフェクトを表示する
+	// エフェクトや音を制御する
 	switch b.selfColor {
 	case bugsRed:
-		// TODO: implement
+		getAudioPlayer().play(soundHikkaki)
 	case bugsBlue:
-		// TODO: implement
+		getAudioPlayer().play(soundHikkaki)
 	case bugsGreen:
+		getAudioPlayer().play(soundShot)
+
 		tx, ty := a.(Building).Position()
 		e := newGreenBugAttackEffect(b.game, b.x, b.y, tx, ty)
 		b.game.updateHandler.Add(e)
@@ -249,6 +251,7 @@ func (b *bug) Damage(d int) {
 
 	if b.health <= 0 {
 		b.health = 0
+		getAudioPlayer().play(soundGyaa)
 	}
 }
 

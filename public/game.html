@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Game Title</title>
+</head>
+<body>
+    <script src="wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        const wasmURL = "main.wasm?v=" + new Date().getTime();
+        WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject).then(result => {
+            go.run(result.instance);
+        });
+    </script>
+</body>
+</html>
+

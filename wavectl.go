@@ -36,6 +36,9 @@ func (w *waveController) Update() {
 		w.game.clickHandler.Add(gover)
 		w.game.drawHandler.Add(gover)
 
+		getAudioPlayer().stopBGM()
+		getAudioPlayer().play(soundGameover)
+
 		// ウェーブ終了みたいなものなので自分を削除する
 		w.game.updateHandler.Remove(w)
 	} else if len(w.game.enemies) == 0 {
@@ -50,6 +53,9 @@ func (w *waveController) Update() {
 
 		// ゲームクリアの処理
 		if w.currentBigWave == len(waveList) {
+			getAudioPlayer().stopBGM()
+			getAudioPlayer().play(soundClear)
+
 			gclear := newGameClear(w.game)
 			w.game.clickHandler.Add(gclear)
 			w.game.drawHandler.Add(gclear)
@@ -124,10 +130,6 @@ var waveList = [][]struct {
 
 func (w *waveController) spawnEnemy() []Enemy {
 	// erapsedFrame に従って敵を生成する
-
-	// いずれ青虫や緑虫も出すようにする
-	//g.drawHandler.Add(newBug(g, bugsBlue, screenWidth/2, screenHeight-100))
-	//g.drawHandler.Add(newBug(g, bugsGreen, screenWidth/2+50, screenHeight-100))
 
 	bugDestroyFn := func(b *bug) {
 		w.game.drawHandler.Remove(b)

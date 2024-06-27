@@ -124,6 +124,8 @@ func (t *radioTower) Update() {
 			ex2, ey2 := e.Position()
 			distance := math.Sqrt(math.Pow(float64(ex-ex2), 2) + math.Pow(float64(ey-ey2), 2))
 			if distance < t.attackZoneRadius {
+				getAudioPlayer().play(soundBakuhatsu)
+
 				b := e.(Damager)
 				b.Damage(t.attackPower)
 
@@ -245,6 +247,7 @@ func (b *radioTower) Damage(d int) {
 
 	b.health -= d
 	if b.health <= 0 {
+		getAudioPlayer().play(soundKuzureru)
 		b.health = 0
 	}
 }
@@ -252,6 +255,7 @@ func (b *radioTower) Damage(d int) {
 // radioTower implements Clickable interface
 func (b *radioTower) OnClick(x, y int) bool {
 	b.game.clickedObject = "radioTower"
+	getAudioPlayer().play(soundChoice)
 
 	// infoPanel に情報を表示する
 
