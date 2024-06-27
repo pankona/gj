@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 
@@ -122,7 +121,7 @@ func mustNewPlayer(context *audio.Context, stream io.Reader) *audio.Player {
 }
 
 func (a *audioPlayer) play(soundname string) {
-	// 同時に鳴らす音は10個までにする
+	// 同時に鳴らす音を制限する
 	var active int
 	for _, player := range a.players {
 		if player.IsPlaying() {
@@ -134,12 +133,13 @@ func (a *audioPlayer) play(soundname string) {
 	}
 
 	if player, ok := a.players[soundname]; ok {
+		if player.IsPlaying() {
+			return
+		}
 		player.Rewind()
 		player.Play()
 		return
 	}
-	fmt.Printf("sound not found: %s\n", soundname)
-	fmt.Printf("sounds: %v\n", a.players)
 }
 
 func (a *audioPlayer) playBGM() {
