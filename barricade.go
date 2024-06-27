@@ -132,6 +132,7 @@ func (b *barricade) Damage(d int) {
 
 	b.health -= d
 	if b.health <= 0 {
+		getAudioPlayer().play(soundKuzureru)
 		b.health = 0
 	}
 }

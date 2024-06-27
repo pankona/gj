@@ -83,6 +83,7 @@ const (
 )
 
 func (g *Game) Update() error {
+
 	// getClickPosition の戻り値を clickHandler.HandleClick に渡す
 	// これをやると登録された Clickable の OnClick が呼ばれる
 	if x, y, clicked := getClickedPosition(); clicked {
@@ -184,6 +185,9 @@ func (g *Game) SetWavePhase() {
 func (g *Game) initialize() {
 	// とりあえずいきなりゲームが始まるとする。
 	// TODO: まずタイトルバックを表示して、その後にゲーム画面に遷移するようにする
+	aplayer := getAudioPlayer()
+	aplayer.playBGM()
+
 	g.house = newHouse(g)
 	g.updateHandler.Add(g.house)
 	g.drawHandler.Add(g.house)

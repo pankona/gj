@@ -53,6 +53,8 @@ func newBuildPane(game *Game) *buildPane {
 			// buildCandidate は次の建築のために初期化する
 			game.buildCandidate = nil
 
+			getAudioPlayer().play(soundDon)
+
 			return false
 		},
 		func(screen *ebiten.Image, x, y, width, height int) {
@@ -88,6 +90,8 @@ func newBuildPane(game *Game) *buildPane {
 
 			game.drawHandler.Remove(game.buildCandidate)
 			game.buildCandidate = nil
+
+			getAudioPlayer().play(soundChoice)
 
 			return false
 		},
@@ -173,6 +177,8 @@ func newReadyButton(g *Game) *Button {
 			// ウェーブフェーズの場合は建築フェーズに遷移する
 			// - atkpane を取り去る
 			// - buildpane を追加する
+
+			getAudioPlayer().play(soundKettei)
 
 			switch g.phase {
 			case PhaseBuilding:

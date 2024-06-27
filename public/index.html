@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Your Game Title</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <script src="wasm_exec.js"></script>
-    <script>
-        const go = new Go();
-        const wasmURL = "main.wasm?v=" + new Date().getTime();
-        WebAssembly.instantiateStreaming(fetch(wasmURL), go.importObject).then(result => {
-            go.run(result.instance);
-        });
-    </script>
+    <iframe src="game.html" allow="autoplay"></iframe>
 </body>
 </html>
-

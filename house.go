@@ -159,6 +159,8 @@ func (h *house) OnClick(x, y int) bool {
 					return false
 				}
 
+				getAudioPlayer().play(soundChoice)
+
 				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
 				// 選択肢なおしということ、いったん手放す
 				if h.game.buildCandidate != nil {
@@ -207,6 +209,8 @@ func (h *house) OnClick(x, y int) bool {
 					return false
 				}
 
+				getAudioPlayer().play(soundChoice)
+
 				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
 				// 選択肢なおしということ、いったん手放す
 				if h.game.buildCandidate != nil {
@@ -254,6 +258,8 @@ func (h *house) OnClick(x, y int) bool {
 					// お金が足りない場合は建築できない
 					return false
 				}
+
+				getAudioPlayer().play(soundChoice)
 
 				// buildCandidate を持っているときにバリケードボタンを押したときの振る舞い
 				// 選択肢なおしということ、いったん手放す

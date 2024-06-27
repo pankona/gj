@@ -113,6 +113,9 @@ func (t *tower) Update() {
 	if t.cooldown == 0 && nearestEnemy != nil && nearestDistance < t.attackRange {
 		bx, by := nearestEnemy.Position()
 		b := nearestEnemy.(Damager)
+
+		getAudioPlayer().play(soundBeam)
+
 		b.Damage(t.attackPower)
 		t.cooldown = towerAttackCoolDown
 
@@ -226,6 +229,7 @@ func (b *tower) Damage(d int) {
 
 	b.health -= d
 	if b.health <= 0 {
+		getAudioPlayer().play(soundKuzureru)
 		b.health = 0
 	}
 }

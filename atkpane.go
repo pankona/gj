@@ -101,6 +101,8 @@ func (h *smallHand) Update() {
 
 	// クリックから 5 フレーム後に攻撃を実行する
 	if h.erapsedTime == 5 {
+		getAudioPlayer().play(soundBinta)
+
 		// 攻撃範囲内にいる敵に対してダメージを与える
 		// ループの中で複数の h.game.enemies が減る可能性があるので、逆順でループする
 		for i := len(h.game.enemies) - 1; i >= 0; i-- {
