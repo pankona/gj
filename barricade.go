@@ -140,6 +140,7 @@ func (b *barricade) Damage(d int) {
 // barricade implements Clickable interface
 func (b *barricade) OnClick(x, y int) bool {
 	b.game.clickedObject = "barricade"
+	getAudioPlayer().play(soundChoice)
 
 	// infoPanel に情報を表示する
 

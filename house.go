@@ -141,6 +141,8 @@ func (h *house) Damage(d int) {
 
 // house implements Clickable interface
 func (h *house) OnClick(x, y int) bool {
+	getAudioPlayer().play(soundChoice)
+
 	h.game.clickedObject = "House"
 	// infoPanel に情報を表示する
 	h.game.infoPanel.ClearButtons()

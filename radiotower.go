@@ -255,6 +255,7 @@ func (b *radioTower) Damage(d int) {
 // radioTower implements Clickable interface
 func (b *radioTower) OnClick(x, y int) bool {
 	b.game.clickedObject = "radioTower"
+	getAudioPlayer().play(soundChoice)
 
 	// infoPanel に情報を表示する
 
