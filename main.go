@@ -63,7 +63,7 @@ const (
 
 const (
 	// 画面上にデバッグ情報を表示するかどうか
-	debugEnabled = true
+	debugEnabled = false
 )
 
 const (
@@ -111,20 +111,15 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawHandler.HandleDraw(screen)
 
-	// 現在のフェーズを表示
-	switch g.phase {
-	case PhaseBuilding:
-		ebitenutil.DebugPrintAt(screen, "Phase: Building", 0, 40)
-	case PhaseWave:
-		ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
-	}
-
-	// 画面右上にクレジットを表示
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Credit: %d", g.credit), screenWidth-100, 0)
-
 	// 以下はデバッグ情報
-
 	if debugEnabled {
+		// 現在のフェーズを表示
+		switch g.phase {
+		case PhaseBuilding:
+			ebitenutil.DebugPrintAt(screen, "Phase: Building", 0, 40)
+		case PhaseWave:
+			ebitenutil.DebugPrintAt(screen, "Phase: Wave", 0, 40)
+		}
 		// クリックされた位置を表示
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Clicked Position: (%d, %d)", g.clickedPositionX, g.clickedPositionY), 0, 0)
 		// クリックされたオブジェクトを表示
@@ -153,6 +148,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Active Audio: %d", activeAudioNum), 0, 160)
+
+		// 画面右上にクレジットを表示
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Credit: %d", g.credit), screenWidth-100, 0)
 	}
 }
 
@@ -276,6 +274,10 @@ func main() {
 
 	// 最初のシーンをセットアップする
 	g.SetBuildingPhase()
+
+	title := newTitle(g)
+	g.drawHandler.Add(title)
+	g.clickHandler.Add(title)
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
