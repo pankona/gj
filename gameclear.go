@@ -9,18 +9,31 @@ import (
 )
 
 type gameclear struct {
-	game *Game
+	game         *Game
+	erapsedFrame int // このフレームを経過しないとクリックできないようにする
 }
 
 func newGameClear(g *Game) *gameclear {
 	return &gameclear{
 		game: g,
+		// 3秒間はクリックを受け付けない
+		erapsedFrame: 60 * 3,
+	}
+}
+
+func (g *gameclear) Update() {
+	if g.erapsedFrame > 0 {
+		g.erapsedFrame--
 	}
 }
 
 func (g *gameclear) OnClick(x, y int) bool {
-	// ゲームリセットする
+	// ちょっとの間クリックを受け付けないようにする
+	if g.erapsedFrame > 0 {
+		return false
+	}
 
+	// ゲームリセットする
 	g.game.Reset()
 
 	// ゲームオーバー画面を削除

@@ -33,6 +33,7 @@ func (w *waveController) Update() {
 	if w.game.house.health <= 0 {
 		// ゲームオーバーの処理
 		gover := newGameover(w.game)
+		w.game.updateHandler.Add(gover)
 		w.game.clickHandler.Add(gover)
 		w.game.drawHandler.Add(gover)
 
@@ -57,9 +58,9 @@ func (w *waveController) Update() {
 			getAudioPlayer().play(soundClear)
 
 			gclear := newGameClear(w.game)
+			w.game.updateHandler.Add(gclear)
 			w.game.clickHandler.Add(gclear)
 			w.game.drawHandler.Add(gclear)
-
 		} else {
 			// ウェーブ間の処理
 			// TODO: 必要ならなにか実装する
