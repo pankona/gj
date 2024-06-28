@@ -69,9 +69,9 @@ func newSmallHand(game *Game) *smallHand {
 		zindex: 100,
 		image:  ebiten.NewImageFromImage(img),
 
-		cooldown: 15, // ここを短くすると連打できるようになっていく
+		cooldown: 10, // ここを短くすると連打できるようになっていく
 
-		attackPower: 1,
+		attackPower: 3,
 	}
 
 	smallHandPool = h

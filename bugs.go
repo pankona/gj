@@ -115,19 +115,19 @@ func newBug(game *Game, bugColor bugColor, x, y int, onDestroy func(b *bug)) *bu
 		bug.speed = 5
 		bug.attackPower = 1
 		bug.attackRange = 1
-		bug.health = 2
+		bug.health = 3
 		bug.name = "Red bug"
 	case bugsBlue:
 		bug.speed = 4
 		bug.attackPower = 1
 		bug.attackRange = 1
-		bug.health = 3
+		bug.health = 5
 		bug.name = "Blue bug"
 	case bugsGreen:
 		bug.speed = 3
 		bug.attackPower = 1
 		bug.attackRange = 50
-		bug.health = 4
+		bug.health = 7
 		bug.name = "Green bug"
 	default:
 		log.Fatal("invalid bug color")
