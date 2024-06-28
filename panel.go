@@ -30,7 +30,7 @@ func newInfoPanel(g *Game, w, h int) *infoPanel {
 		y:      screenHeight - h - bottomMargin,
 		width:  w,
 		height: h,
-		zindex: 10,
+		zindex: 60,
 	}
 }
 
