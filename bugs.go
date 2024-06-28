@@ -173,13 +173,14 @@ func (b *bug) attack(a Damager) {
 	a.Damage(b.attackPower)
 
 	// エフェクトや音を制御する
+	// TODO: 攻撃時に音が鳴りすぎてパフォーマンス問題が発生するので、いったん音を鳴らさないようにしている
 	switch b.selfColor {
 	case bugsRed:
-		getAudioPlayer().play(soundHikkaki)
+		//getAudioPlayer().play(soundHikkaki)
 	case bugsBlue:
-		getAudioPlayer().play(soundHikkaki)
+		//getAudioPlayer().play(soundHikkaki)
 	case bugsGreen:
-		getAudioPlayer().play(soundShot)
+		//getAudioPlayer().play(soundShot)
 
 		tx, ty := a.(Building).Position()
 		e := newGreenBugAttackEffect(b.game, b.x, b.y, tx, ty)
