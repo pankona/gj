@@ -240,7 +240,7 @@ func (g *Game) Reset() {
 
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Hello, World!")
+	ebiten.SetWindowTitle("House Defence Operation")
 
 	g := &Game{
 		clickHandler:  &OnClickHandler{},
