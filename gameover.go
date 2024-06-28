@@ -10,17 +10,30 @@ import (
 
 type gameover struct {
 	game *Game
+
+	erapsedFrame int // このフレームを経過しないとクリックできないようにする
 }
 
 func newGameover(g *Game) *gameover {
 	return &gameover{
-		game: g,
+		game:         g,
+		erapsedFrame: 60 * 3,
+	}
+}
+
+func (g *gameover) Update() {
+	if g.erapsedFrame > 0 {
+		g.erapsedFrame--
 	}
 }
 
 func (g *gameover) OnClick(x, y int) bool {
-	// ゲームリセットする
+	// ちょっとの間クリックを受け付けないようにする
+	if g.erapsedFrame > 0 {
+		return false
+	}
 
+	// ゲームリセットする
 	g.game.Reset()
 
 	// ゲームオーバー画面を削除

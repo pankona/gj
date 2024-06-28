@@ -141,6 +141,13 @@ func (h *house) Damage(d int) {
 
 // house implements Clickable interface
 func (h *house) OnClick(x, y int) bool {
+
+	// 建築 instruction を消す
+	if h.game.buildInstruction != nil {
+		h.game.drawHandler.Remove(h.game.buildInstruction)
+		h.game.buildInstruction = nil
+	}
+
 	getAudioPlayer().play(soundChoice)
 
 	h.game.clickedObject = "House"
@@ -302,6 +309,38 @@ func (h *house) OnClick(x, y int) bool {
 				}
 			})
 		h.game.infoPanel.AddButton(buildRadioTowerButton)
+
+		nextWaveStartButton := newButton(h.game,
+			screenWidth-10-infoPanelHeight, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				getAudioPlayer().play(soundKettei)
+
+				switch h.game.phase {
+				case PhaseBuilding:
+					// 最初のウェーブだったら攻撃方法に関する説明を表示する
+					if h.game.waveCtrl.currentBigWave == 0 {
+						h.game.attackInstruction = newInstruction(h.game, "CLICK BUGS TO ATTACK!", screenWidth/2-60, eScreenHeight/2+50)
+						h.game.drawHandler.Add(h.game.attackInstruction)
+					}
+					h.game.SetWavePhase()
+				case PhaseWave:
+					// never reach
+					fallthrough
+				default:
+					log.Fatalf("unexpected phase: %v", h.game.phase)
+				}
+
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				ebitenutil.DebugPrintAt(screen, "FINISH BUILDING!", x+width/2-45, y+height/2-40)
+				ebitenutil.DebugPrintAt(screen, "START NEXT WAVE!", x+width/2-45, y+height/2-8)
+				// 現在のウェーブとトータルウェーブ数を表示する
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave, len(waveList)), x+width/2-52, y+height/2+32)
+			},
+		)
+		h.game.infoPanel.AddButton(nextWaveStartButton)
 
 	case PhaseWave:
 		// TODO: implement
