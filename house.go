@@ -141,6 +141,13 @@ func (h *house) Damage(d int) {
 
 // house implements Clickable interface
 func (h *house) OnClick(x, y int) bool {
+
+	// 建築 instruction を消す
+	if h.game.buildInstruction != nil {
+		h.game.drawHandler.Remove(h.game.buildInstruction)
+		h.game.buildInstruction = nil
+	}
+
 	getAudioPlayer().play(soundChoice)
 
 	h.game.clickedObject = "House"
@@ -310,9 +317,15 @@ func (h *house) OnClick(x, y int) bool {
 
 				switch h.game.phase {
 				case PhaseBuilding:
+					// 最初のウェーブだったら攻撃方法に関する説明を表示する
+					if h.game.waveCtrl.currentBigWave == 0 {
+						h.game.attackInstruction = newInstruction(h.game, "CLICK BUGS TO ATTACK!", screenWidth/2-60, eScreenHeight/2+50)
+						h.game.drawHandler.Add(h.game.attackInstruction)
+					}
 					h.game.SetWavePhase()
 				case PhaseWave:
-					h.game.SetBuildingPhase()
+					// never reach
+					fallthrough
 				default:
 					log.Fatalf("unexpected phase: %v", h.game.phase)
 				}

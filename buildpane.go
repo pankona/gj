@@ -23,7 +23,7 @@ type buildPane struct {
 }
 
 func newBuildPane(game *Game) *buildPane {
-	okButton := newButton(game, screenWidth-200-22, eScreenHeight-130, 100, 50, 110,
+	okButton := newButton(game, screenWidth-200-22, eScreenHeight-80, 100, 50, 110,
 		func(x, y int) bool {
 			if game.buildCandidate == nil {
 				return true
@@ -70,10 +70,10 @@ func newBuildPane(game *Game) *buildPane {
 			} else {
 				drawRect(screen, x, y, width, height)
 			}
-			ebitenutil.DebugPrintAt(screen, "OK", x+width/2-10, y+height/2-8)
+			ebitenutil.DebugPrintAt(screen, "BUILD IT!", x+width/2-25, y+height/2-8)
 		})
 
-	cancelButton := newButton(game, screenWidth-100-12, eScreenHeight-130, 100, 50, 110,
+	cancelButton := newButton(game, screenWidth-100-12, eScreenHeight-80, 100, 50, 110,
 		func(x, y int) bool {
 			if game.buildCandidate == nil {
 				return true

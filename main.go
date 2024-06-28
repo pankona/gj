@@ -45,6 +45,12 @@ type Game struct {
 	// ウェーブのコントローラ
 	waveCtrl *waveController
 
+	// 最初のウェーブが始まる前に表示するインストラクション
+	buildInstruction *instruction
+
+	// 攻撃のインストラクション
+	attackInstruction *instruction
+
 	credit int
 }
 
@@ -219,10 +225,28 @@ func (g *Game) initialize() {
 	// 敵が全滅したらウェーブを終了して建築フェーズに戻る
 	// 敵が全滅したことをコールバックする
 	waveEndFn := func() {
+		// 最初のウェーブが終了したら攻撃インストラクションを消す
+		if g.attackInstruction != nil {
+			g.drawHandler.Remove(g.attackInstruction)
+			g.attackInstruction = nil
+		}
+
+		// 建築 instruction を出す
+		g.buildInstruction = newInstruction(g, "CLICK ME TO OPEN BUILD MENU", screenWidth/2-80, eScreenHeight/2+50)
+		g.drawHandler.Add(g.buildInstruction)
+
+		// TODO: ウェーブが終わっておめでとう的なことを少しの間だけ表示する
+		// その後に建築フェーズに移行する
+
 		g.SetBuildingPhase()
 		// ウェーブ終了時に一定のクレジットを得る
 		g.credit += 120
 	}
+
+	// インストラクションを表示
+	// 家がクリックされたら消える
+	g.buildInstruction = newInstruction(g, "CLICK ME TO OPEN BUILD MENU", screenWidth/2-80, eScreenHeight/2+50)
+	g.drawHandler.Add(g.buildInstruction)
 
 	g.waveCtrl = newWaveController(g, waveEndFn)
 }
