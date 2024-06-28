@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
 	_ "embed"
 	_ "image/png"
@@ -149,6 +151,12 @@ func (b *barricade) OnClick(x, y int) bool {
 	icon := newBarricadeIcon(80, eScreenHeight+70)
 	b.game.infoPanel.setIcon(icon)
 	b.game.infoPanel.setUnit(b)
+	b.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
+		ebitenutil.DebugPrintAt(screen, "I am Barricade!", x, y)
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20)
+		// 敵の進行を邪魔するという説明を記載する
+		ebitenutil.DebugPrintAt(screen, "Blocks enemy's advance!", x, y+40)
+	}
 
 	return false
 }

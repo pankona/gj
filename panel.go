@@ -20,6 +20,8 @@ type infoPanel struct {
 	icon    *icon
 	unit    infoer
 	buttons []*Button
+
+	drawDescriptionFn func(screen *ebiten.Image, x, y int)
 }
 
 func newInfoPanel(g *Game, w, h int) *infoPanel {
@@ -30,7 +32,7 @@ func newInfoPanel(g *Game, w, h int) *infoPanel {
 		y:      screenHeight - h - bottomMargin,
 		width:  w,
 		height: h,
-		zindex: 10,
+		zindex: 60,
 	}
 }
 
@@ -78,6 +80,7 @@ func (p *infoPanel) ClearButtons() {
 		p.game.clickHandler.Remove(button)
 	}
 	p.buttons = nil
+	p.drawDescriptionFn = nil
 }
 
 func (p *infoPanel) Draw(screen *ebiten.Image) {
@@ -102,9 +105,20 @@ func (p *infoPanel) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%s", name), p.x+100+40, p.y+30)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("HP: %d", health), p.x+100+40, p.y+50)
 
+	// 家だったら現在のクレジットも表示する
+	if name == "House" {
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("$: %d", p.game.credit), p.x+100+40, p.y+70)
+	}
+
 	// ボタンを描画
 	for _, button := range p.buttons {
 		button.Draw(screen)
+	}
+
+	// description を描画
+	// ボタンの右側に表示するので、ボタンの数だけ右にずらす
+	if p.drawDescriptionFn != nil {
+		p.drawDescriptionFn(screen, 255+infoPanelHeight*len(p.buttons), p.y+30)
 	}
 }
 
