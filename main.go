@@ -69,9 +69,9 @@ const (
 
 // コスト一覧
 const (
-	CostBarricadeBuild  = 30
-	CostTowerBuild      = 50
-	CostRadioTowerBuild = 70
+	CostBarricadeBuild  = 50
+	CostTowerBuild      = 150
+	CostRadioTowerBuild = 250
 )
 
 const (
@@ -221,7 +221,7 @@ func (g *Game) initialize() {
 	waveEndFn := func() {
 		g.SetBuildingPhase()
 		// ウェーブ終了時に一定のクレジットを得る
-		g.credit += 100
+		g.credit += 120
 	}
 
 	g.waveCtrl = newWaveController(g, waveEndFn)

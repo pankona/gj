@@ -75,7 +75,12 @@ type spawnInfo struct {
 	x, y  int
 }
 
-func generateSpawnInfos(num int) []spawnInfo {
+// トータル10になるようにする
+type bugSpawnRatio struct {
+	red, blue, green int
+}
+
+func generateSpawnInfos(num int, spawnRatio bugSpawnRatio) []spawnInfo {
 	rand.NewSource(time.Now().UnixNano())
 	var infos []spawnInfo
 
@@ -98,11 +103,10 @@ func generateSpawnInfos(num int) []spawnInfo {
 			y = rand.Intn(screenHeight)
 		}
 
-		// 赤虫:青虫:緑 = 3:5:2 で生成する
 		r := rand.Intn(10)
-		if r < 3 {
+		if r < spawnRatio.red {
 			infos = append(infos, spawnInfo{bugsRed, x, y})
-		} else if r < 8 {
+		} else if r < spawnRatio.red+spawnRatio.blue {
 			infos = append(infos, spawnInfo{bugsBlue, x, y})
 		} else {
 			infos = append(infos, spawnInfo{bugsGreen, x, y})
@@ -116,15 +120,63 @@ var waveList = [][]struct {
 	spawnFrame    int
 	spawnInfoList []spawnInfo
 }{
-	{
-		{0, generateSpawnInfos(20)},
-		{60, generateSpawnInfos(20)},
-		{120, generateSpawnInfos(20)},
+	// ウェーブにおける敵の戦闘力は以下のように計算してみる
+	// 1. 赤虫: 1, 青虫: 2, 緑虫: 3
+	// 2. それぞれの虫の数をかけて、それを足し合わせる
+	// 3. それをウェーブの戦闘力とする
+	// 例: 赤虫が 5, 青虫が 3, 緑虫が 2 の場合、戦闘力は 5*1 + 3*2 + 2*3 = 5 + 6 + 6 = 17 となる
+	// 後半のウェーブは戦闘力が高くなるように設定している
+
+	{ // 戦闘力10 赤だけ
+		{0, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
+		{60, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
 	},
-	{
-		{0, generateSpawnInfos(25)},
-		{60, generateSpawnInfos(25)},
-		{120, generateSpawnInfos(25)},
+	{ // 戦闘力20 青だけ
+		{0, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
+		{60, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
+	},
+	{ // 戦闘力30 緑だけ
+		{0, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
+		{60, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
+	},
+	{ // 戦闘力40 赤青混合
+		{0, generateSpawnInfos(12, bugSpawnRatio{4, 6, 0})},
+		{60, generateSpawnInfos(13, bugSpawnRatio{4, 6, 0})},
+	},
+	{ // 戦闘力50 青緑混合
+		{0, generateSpawnInfos(12, bugSpawnRatio{0, 6, 4})},
+		{60, generateSpawnInfos(13, bugSpawnRatio{0, 6, 4})},
+	},
+	{ // 戦闘力60 赤緑混合
+		{0, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
+		{60, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
+	},
+	{ // 戦闘力70 全部混合ちょっといっぱいくる
+		{0, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+		{60, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+		{120, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+		{240, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+	},
+	{ // 戦闘力80 全部混合ちょっと控えめ
+		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+	},
+	{ // 戦闘力90 全部混合ちょっと控えめ
+		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+	},
+	{ // 戦闘力90 全部混合ちょっと控えめ
+		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+	},
+	{ // 戦闘力100 全部混合いっぱいくる
+		{0, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+		{60, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+		{120, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+		{240, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
 	},
 }
 

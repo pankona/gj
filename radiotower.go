@@ -47,7 +47,7 @@ type radioTower struct {
 	isOverlapping bool
 }
 
-const radioTowerAttackCoolDown = 30
+const radioTowerAttackCoolDown = 60
 
 func newRadioTower(game *Game, x, y int, onDestroy func(b *radioTower)) *radioTower {
 	img, _, err := image.Decode(bytes.NewReader(radioTowerImageData))
@@ -72,7 +72,7 @@ func newRadioTower(game *Game, x, y int, onDestroy func(b *radioTower)) *radioTo
 		longAttackRange:  400,
 		attackZoneRadius: 50,
 
-		attackPower: 10,
+		attackPower: 5,
 
 		image: ebiten.NewImageFromImage(img),
 

@@ -45,7 +45,7 @@ type tower struct {
 	isOverlapping bool
 }
 
-const towerAttackCoolDown = 15
+const towerAttackCoolDown = 30
 
 func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 	img, _, err := image.Decode(bytes.NewReader(towerImageData))
@@ -64,7 +64,7 @@ func newTower(game *Game, x, y int, onDestroy func(b *tower)) *tower {
 
 		health:      70,
 		attackRange: 300,
-		attackPower: 2,
+		attackPower: 1,
 
 		image: ebiten.NewImageFromImage(img),
 

@@ -128,11 +128,12 @@ func (a *audioPlayer) play(soundname string) {
 			active++
 		}
 	}
-	if active >= 5 {
+	if active >= 10 {
 		return
 	}
 
 	if player, ok := a.players[soundname]; ok {
+		// TODO: 同時に同じ音がいっぱい音が鳴るとパフォーマンスが悪くなるので、いったん同時に音が鳴らないようにしている
 		if player.IsPlaying() {
 			return
 		}
