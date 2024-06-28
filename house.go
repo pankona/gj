@@ -303,6 +303,32 @@ func (h *house) OnClick(x, y int) bool {
 			})
 		h.game.infoPanel.AddButton(buildRadioTowerButton)
 
+		nextWaveStartButton := newButton(h.game,
+			screenWidth-10-infoPanelHeight, eScreenHeight, infoPanelHeight, infoPanelHeight, 1,
+			func(x, y int) bool {
+				getAudioPlayer().play(soundKettei)
+
+				switch h.game.phase {
+				case PhaseBuilding:
+					h.game.SetWavePhase()
+				case PhaseWave:
+					h.game.SetBuildingPhase()
+				default:
+					log.Fatalf("unexpected phase: %v", h.game.phase)
+				}
+
+				return false
+			},
+			func(screen *ebiten.Image, x, y, width, height int) {
+				drawRect(screen, x, y, width, height)
+				ebitenutil.DebugPrintAt(screen, "FINISH BUILDING!", x+width/2-45, y+height/2-40)
+				ebitenutil.DebugPrintAt(screen, "START NEXT WAVE!", x+width/2-45, y+height/2-8)
+				// 現在のウェーブとトータルウェーブ数を表示する
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave, len(waveList)), x+width/2-52, y+height/2+32)
+			},
+		)
+		h.game.infoPanel.AddButton(nextWaveStartButton)
+
 	case PhaseWave:
 		// TODO: implement
 	default:

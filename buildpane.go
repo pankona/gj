@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 
@@ -109,11 +107,8 @@ func newBuildPane(game *Game) *buildPane {
 			ebitenutil.DebugPrintAt(screen, "Cancel", x+width/2-20, y+height/2-8)
 		})
 
-	readyButton := newReadyButton(game)
-
 	game.clickHandler.Add(okButton)
 	game.clickHandler.Add(cancelButton)
-	game.clickHandler.Add(readyButton)
 
 	return &buildPane{
 		game: game,
@@ -126,14 +121,12 @@ func newBuildPane(game *Game) *buildPane {
 
 		okButton:     okButton,
 		cancelButton: cancelButton,
-		readyButton:  readyButton,
 	}
 }
 
 func (a *buildPane) Draw(screen *ebiten.Image) {
 	a.okButton.Draw(screen)
 	a.cancelButton.Draw(screen)
-	a.readyButton.Draw(screen)
 }
 
 // buildPane implement Clickable interface
@@ -161,41 +154,6 @@ func (a *buildPane) IsClicked(x, y int) bool {
 
 func (a *buildPane) ZIndex() int {
 	return a.zindex
-}
-
-func newReadyButton(g *Game) *Button {
-	width, height := 100, 40
-	x := screenWidth - width - 12
-	y := eScreenHeight - height - 20
-
-	return newButton(g, x, y, width, height, 110,
-		func(x, y int) bool {
-			// 現在のフェーズによって処理を変える
-			// 建築フェーズの場合はウェーブフェーズに遷移する
-			// - buildpane を取り去る
-			// - atkpane を追加する
-			// ウェーブフェーズの場合は建築フェーズに遷移する
-			// - atkpane を取り去る
-			// - buildpane を追加する
-
-			getAudioPlayer().play(soundKettei)
-
-			switch g.phase {
-			case PhaseBuilding:
-				g.SetWavePhase()
-			case PhaseWave:
-				g.SetBuildingPhase()
-			default:
-				log.Fatalf("unexpected phase: %v", g.phase)
-			}
-
-			return false
-		},
-		func(screen *ebiten.Image, x, y, width, height int) {
-			// ボタンの枠を描く（白）
-			drawRect(screen, x, y, width, height)
-			ebitenutil.DebugPrintAt(screen, "READY", x+width/2-15, y+height/2-7)
-		})
 }
 
 // ウェーブフェーズに繊維するとき、建築フェーズのパネルを取り去る
