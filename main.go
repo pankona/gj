@@ -220,7 +220,7 @@ func (g *Game) initialize() {
 	g.drawHandler.Add(bg)
 
 	// クレジットを初期化
-	g.credit = 1000
+	g.credit = 100
 
 	// 敵が全滅したらウェーブを終了して建築フェーズに戻る
 	// 敵が全滅したことをコールバックする
