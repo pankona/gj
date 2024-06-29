@@ -52,7 +52,7 @@ func newHouse(game *Game) *house {
 		height: img.Bounds().Dy(),
 		scale:  0.5,
 
-		health: 1,
+		health: 100,
 
 		image: ebiten.NewImageFromImage(img),
 
