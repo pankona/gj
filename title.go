@@ -134,7 +134,7 @@ func (t *title) Draw(screen *ebiten.Image) {
 	}
 
 	// 文字を描く
-	clr := color.RGBA{R: 0x80, G: 0x80, B: 0x80, A: 0xff}
+	clr := color.RGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	scaleX, scaleY = float64(5), float64(5)
 
 	textOp := &text.DrawOptions{}
