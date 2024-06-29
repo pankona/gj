@@ -8,7 +8,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
@@ -254,10 +253,11 @@ func (b *tower) OnClick(x, y int) bool {
 	b.game.infoPanel.setIcon(icon)
 	b.game.infoPanel.setUnit(b)
 	b.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
-		ebitenutil.DebugPrintAt(screen, "I am Beam Tower!", x, y)
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20)
+		var scale float64 = 2
 		// 敵を一匹ずつ攻撃するという説明を記載する
-		ebitenutil.DebugPrintAt(screen, "Attack single bug by laser beam!", x, y+40)
+		drawText(screen, "I am Beam Tower!", x, y-10, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		drawText(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		drawText(screen, "Attack single bug by laser beam!", x, y+50, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 	}
 
 	return false

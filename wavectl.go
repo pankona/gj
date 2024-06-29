@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"image/color"
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type waveController struct {
@@ -63,12 +67,55 @@ func (w *waveController) Update() {
 			w.game.drawHandler.Add(gclear)
 		} else {
 			// ウェーブ間の処理
-			// TODO: 必要ならなにか実装する
+			t := newTimerText(w.game, screenWidth/2-350, screenHeight/2+50, "Wave Clear! Credit Earned! $120")
+			w.game.drawHandler.Add(t)
+			w.game.updateHandler.Add(t)
+			t = newTimerText(w.game, screenWidth/2-200, screenHeight/2+150, fmt.Sprintf("Waves remaining: %d", len(waveList)-w.currentBigWave))
+			w.game.drawHandler.Add(t)
+			w.game.updateHandler.Add(t)
+
 		}
 
 		// ウェーブが終了したら自分自身を削除する
 		w.game.updateHandler.Remove(w)
 	}
+}
+
+// ウェーブ間に表示するテキスト
+// 主にお金が手に入ったことを伝えるのが目的
+type timerText struct {
+	game *Game
+
+	x, y int
+	text string
+
+	displayFrame int
+}
+
+func newTimerText(g *Game, x, y int, text string) *timerText {
+	return &timerText{
+		game:         g,
+		x:            x,
+		y:            y,
+		text:         text,
+		displayFrame: 300,
+	}
+}
+
+func (c *timerText) Update() {
+	c.displayFrame--
+	if c.displayFrame <= 0 {
+		c.game.drawHandler.Remove(c)
+		c.game.updateHandler.Remove(c)
+	}
+}
+
+func (c *timerText) Draw(screen *ebiten.Image) {
+	drawText(screen, c.text, c.x, c.y, 4, 4, color.RGBA{0xff, 0xff, 0xff, 0xff})
+}
+
+func (c *timerText) ZIndex() int {
+	return 300
 }
 
 type spawnInfo struct {
@@ -128,57 +175,62 @@ var waveList = [][]struct {
 	// 例: 赤虫が 5, 青虫が 3, 緑虫が 2 の場合、戦闘力は 5*1 + 3*2 + 2*3 = 5 + 6 + 6 = 17 となる
 	// 後半のウェーブは戦闘力が高くなるように設定している
 
-	{ // 戦闘力10 赤だけ
+	{
 		{0, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
-		{60, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
 	},
-	{ // 戦闘力20 青だけ
-		{0, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
-		{60, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
-	},
-	{ // 戦闘力30 緑だけ
-		{0, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
-		{60, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
-	},
-	{ // 戦闘力40 赤青混合
-		{0, generateSpawnInfos(12, bugSpawnRatio{4, 6, 0})},
-		{60, generateSpawnInfos(13, bugSpawnRatio{4, 6, 0})},
-	},
-	{ // 戦闘力50 青緑混合
-		{0, generateSpawnInfos(12, bugSpawnRatio{0, 6, 4})},
-		{60, generateSpawnInfos(13, bugSpawnRatio{0, 6, 4})},
-	},
-	{ // 戦闘力60 赤緑混合
-		{0, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
-		{60, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
-	},
-	{ // 戦闘力70 全部混合ちょっといっぱいくる
-		{0, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
-		{60, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
-		{120, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
-		{240, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
-	},
-	{ // 戦闘力80 全部混合ちょっと控えめ
-		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-	},
-	{ // 戦闘力90 全部混合ちょっと控えめ
-		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-	},
-	{ // 戦闘力90 全部混合ちょっと控えめ
-		{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-		{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
-	},
-	{ // 戦闘力100 全部混合いっぱいくる
-		{0, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
-		{60, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
-		{120, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
-		{240, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
-	},
+	/*
+		{ // 戦闘力10 赤だけ
+			{0, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
+			{60, generateSpawnInfos(5, bugSpawnRatio{10, 0, 0})},
+		},
+		{ // 戦闘力20 青だけ
+			{0, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
+			{60, generateSpawnInfos(5, bugSpawnRatio{0, 10, 0})},
+		},
+		{ // 戦闘力30 緑だけ
+			{0, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
+			{60, generateSpawnInfos(5, bugSpawnRatio{0, 0, 10})},
+		},
+		{ // 戦闘力40 赤青混合
+			{0, generateSpawnInfos(12, bugSpawnRatio{4, 6, 0})},
+			{60, generateSpawnInfos(13, bugSpawnRatio{4, 6, 0})},
+		},
+		{ // 戦闘力50 青緑混合
+			{0, generateSpawnInfos(12, bugSpawnRatio{0, 6, 4})},
+			{60, generateSpawnInfos(13, bugSpawnRatio{0, 6, 4})},
+		},
+		{ // 戦闘力60 赤緑混合
+			{0, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
+			{60, generateSpawnInfos(19, bugSpawnRatio{7, 0, 3})},
+		},
+		{ // 戦闘力70 全部混合ちょっといっぱいくる
+			{0, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+			{60, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+			{120, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+			{240, generateSpawnInfos(20, bugSpawnRatio{3, 5, 2})},
+		},
+		{ // 戦闘力80 全部混合ちょっと控えめ
+			{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		},
+		{ // 戦闘力90 全部混合ちょっと控えめ
+			{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		},
+		{ // 戦闘力90 全部混合ちょっと控えめ
+			{0, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{60, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+			{120, generateSpawnInfos(14, bugSpawnRatio{3, 5, 2})},
+		},
+		{ // 戦闘力100 全部混合いっぱいくる
+			{0, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+			{60, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+			{120, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+			{240, generateSpawnInfos(30, bugSpawnRatio{3, 5, 2})},
+		},
+	*/
 }
 
 func (w *waveController) spawnEnemy() []Enemy {

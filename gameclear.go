@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -57,8 +56,8 @@ func (g *gameclear) Draw(screen *ebiten.Image) {
 	// 画面全体を半透明の黒で覆う
 	vector.DrawFilledRect(screen, 0, 0, screenWidth, screenHeight, color.RGBA{0, 0, 0, 0x90}, true)
 
-	// とりあえず画面中央に Game Clear って出す
-	ebitenutil.DebugPrintAt(screen, "Congratulation! Game Clear!", screenWidth/2-80, eScreenHeight/2-20)
+	// 画面中央に勝った感のあるメッセージを出す
+	drawText(screen, "Congratulations! All waves over!", screenWidth/2-490, eScreenHeight/2-100, 5, 5, color.RGBA{0xff, 0xff, 0xff, 0xff})
 	// Click to Restart って出す
-	ebitenutil.DebugPrintAt(screen, "Click to Restart", screenWidth/2-50, eScreenHeight/2+10)
+	drawText(screen, "Click to Restart", screenWidth/2-230, eScreenHeight/2+100, 5, 5, color.RGBA{0xff, 0xff, 0xff, 0xff})
 }

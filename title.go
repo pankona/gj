@@ -6,9 +6,7 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/hajimehoshi/bitmapfont/v3"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
 type title struct {
@@ -136,19 +134,8 @@ func (t *title) Draw(screen *ebiten.Image) {
 	// 文字を描く
 	clr := color.RGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff}
 	scaleX, scaleY = float64(5), float64(5)
-
-	textOp := &text.DrawOptions{}
-	textOp.ColorScale.ScaleWithColor(clr)
-	textOp.GeoM.Scale(scaleX, scaleY)
-	textOp.GeoM.Translate(float64(screenWidth-750), 100)
-	text.Draw(screen, "HOUSE DEFENSE OPERATION!", text.NewGoXFace(bitmapfont.Face), textOp)
-
-	textOp = &text.DrawOptions{}
-	textOp.ColorScale.ScaleWithColor(clr)
-	textOp.GeoM.Scale(scaleX, scaleY)
-	textOp.GeoM.Translate(float64(screenWidth-750), 170)
-	text.Draw(screen, "CLICK TO START!", text.NewGoXFace(bitmapfont.Face), textOp)
-
+	drawText(screen, "HOUSE DEFENSE OPERATION!", screenWidth-750, 100, scaleX, scaleY, clr)
+	drawText(screen, "CLICK TO START!", screenWidth-750, 170, scaleX, scaleY, clr)
 }
 
 func (t *title) ZIndex() int {
