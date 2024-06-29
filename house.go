@@ -369,7 +369,7 @@ func (h *house) OnClick(x, y int) bool {
 				ebitenutil.DebugPrintAt(screen, "FINISH BUILDING!", x+width/2-45, y+height/2-40)
 				ebitenutil.DebugPrintAt(screen, "START NEXT WAVE!", x+width/2-45, y+height/2-8)
 				// 現在のウェーブとトータルウェーブ数を表示する
-				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave, len(waveList)), x+width/2-52, y+height/2+32)
+				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave+1, len(waveList)), x+width/2-52, y+height/2+32)
 			},
 		)
 		h.game.infoPanel.AddButton(nextWaveStartButton)

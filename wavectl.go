@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"image/color"
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type waveController struct {
@@ -63,12 +67,55 @@ func (w *waveController) Update() {
 			w.game.drawHandler.Add(gclear)
 		} else {
 			// ウェーブ間の処理
-			// TODO: 必要ならなにか実装する
+			t := newTimerText(w.game, screenWidth/2-350, screenHeight/2+50, "Wave Clear! Credit Earned! $120")
+			w.game.drawHandler.Add(t)
+			w.game.updateHandler.Add(t)
+			t = newTimerText(w.game, screenWidth/2-200, screenHeight/2+150, fmt.Sprintf("Waves remaining: %d", len(waveList)-w.currentBigWave))
+			w.game.drawHandler.Add(t)
+			w.game.updateHandler.Add(t)
+
 		}
 
 		// ウェーブが終了したら自分自身を削除する
 		w.game.updateHandler.Remove(w)
 	}
+}
+
+// ウェーブ間に表示するテキスト
+// 主にお金が手に入ったことを伝えるのが目的
+type timerText struct {
+	game *Game
+
+	x, y int
+	text string
+
+	displayFrame int
+}
+
+func newTimerText(g *Game, x, y int, text string) *timerText {
+	return &timerText{
+		game:         g,
+		x:            x,
+		y:            y,
+		text:         text,
+		displayFrame: 300,
+	}
+}
+
+func (c *timerText) Update() {
+	c.displayFrame--
+	if c.displayFrame <= 0 {
+		c.game.drawHandler.Remove(c)
+		c.game.updateHandler.Remove(c)
+	}
+}
+
+func (c *timerText) Draw(screen *ebiten.Image) {
+	drawText(screen, c.text, c.x, c.y, 4, 4, color.RGBA{0xff, 0xff, 0xff, 0xff})
+}
+
+func (c *timerText) ZIndex() int {
+	return 300
 }
 
 type spawnInfo struct {
