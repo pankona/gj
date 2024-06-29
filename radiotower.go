@@ -256,6 +256,11 @@ func (b *radioTower) Damage(d int) {
 
 // radioTower implements Clickable interface
 func (b *radioTower) OnClick(x, y int) bool {
+	if b.game.buildCandidate != nil {
+		// 建築予定のものを持っているときには何もしない
+		return false
+	}
+
 	b.game.clickedObject = "radioTower"
 	getAudioPlayer().play(soundChoice)
 

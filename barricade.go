@@ -141,6 +141,11 @@ func (b *barricade) Damage(d int) {
 
 // barricade implements Clickable interface
 func (b *barricade) OnClick(x, y int) bool {
+	if b.game.buildCandidate != nil {
+		// 建築予定のものを持っているときには何もしない
+		return false
+	}
+
 	b.game.clickedObject = "barricade"
 	getAudioPlayer().play(soundChoice)
 

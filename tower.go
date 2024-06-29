@@ -238,6 +238,11 @@ func (b *tower) Damage(d int) {
 
 // tower implements Clickable interface
 func (b *tower) OnClick(x, y int) bool {
+	if b.game.buildCandidate != nil {
+		// 建築予定のものを持っているときには何もしない
+		return false
+	}
+
 	b.game.clickedObject = "tower"
 	getAudioPlayer().play(soundChoice)
 

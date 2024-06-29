@@ -50,6 +50,7 @@ func newBuildPane(game *Game) *buildPane {
 
 			// buildCandidate は次の建築のために初期化する
 			game.buildCandidate = nil
+			game.infoPanel.drawDescriptionFn = nil
 
 			getAudioPlayer().play(soundDon)
 
@@ -88,6 +89,7 @@ func newBuildPane(game *Game) *buildPane {
 
 			game.drawHandler.Remove(game.buildCandidate)
 			game.buildCandidate = nil
+			game.infoPanel.drawDescriptionFn = nil
 
 			getAudioPlayer().play(soundChoice)
 
