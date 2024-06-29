@@ -52,7 +52,7 @@ func newHouse(game *Game) *house {
 		height: img.Bounds().Dy(),
 		scale:  0.5,
 
-		health: 100,
+		health: 1,
 
 		image: ebiten.NewImageFromImage(img),
 
@@ -193,10 +193,11 @@ func (h *house) OnClick(x, y int) bool {
 				h.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
 					x = x - 150
 					y = y + 10
-					ebitenutil.DebugPrintAt(screen, "I am Barricade!", x, y)
-					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20)
+					var scale float64 = 2
+					drawText(screen, "I am Barricade!", x, y-15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+					drawText(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 					// 敵の進行を邪魔するという説明を記載する
-					ebitenutil.DebugPrintAt(screen, "Blocks enemy's advance!", x, y+40)
+					drawText(screen, "Blocks enemy's advance!", x, y+45, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 				}
 				return false
 			},
@@ -253,10 +254,11 @@ func (h *house) OnClick(x, y int) bool {
 				t.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
 					x = x - 150
 					y = y + 10
-					ebitenutil.DebugPrintAt(screen, "I am Beam Tower!", x, y)
-					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", t.Cost()), x, y+20)
+					var scale float64 = 2
 					// 敵を一匹ずつ攻撃するという説明を記載する
-					ebitenutil.DebugPrintAt(screen, "Attack single bug by laser beam!", x, y+40)
+					drawText(screen, "I am Beam Tower!", x, y-15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+					drawText(screen, fmt.Sprintf("Cost: $%d", t.Cost()), x, y+15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+					drawText(screen, "Attack single bug by laser beam!", x, y+45, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 				}
 				return false
 			},
@@ -312,10 +314,11 @@ func (h *house) OnClick(x, y int) bool {
 				h.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
 					x = x - 150
 					y = y + 10
-					ebitenutil.DebugPrintAt(screen, "I am Radio Tower!", x, y)
-					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", rt.Cost()), x, y+20)
+					var scale float64 = 2
 					// 範囲攻撃するしレンジも広いが、近くは攻撃できない
-					ebitenutil.DebugPrintAt(screen, "Attacks in an area, effective at range, but cannot hit nearby enemies.", x, y+40)
+					drawText(screen, "I am Radio Tower!", x, y-15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+					drawText(screen, fmt.Sprintf("Cost: $%d", rt.Cost()), x, y+15, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+					drawText(screen, "Attacks in area, cannot hit near bugs!", x, y+45, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 				}
 				return false
 			},
@@ -366,10 +369,10 @@ func (h *house) OnClick(x, y int) bool {
 			},
 			func(screen *ebiten.Image, x, y, width, height int) {
 				drawRect(screen, x, y, width, height)
-				ebitenutil.DebugPrintAt(screen, "FINISH BUILDING!", x+width/2-45, y+height/2-40)
-				ebitenutil.DebugPrintAt(screen, "START NEXT WAVE!", x+width/2-45, y+height/2-8)
+				drawText(screen, "FINISH BUILDING!", x+width/2-45, y+height/2-40, 1, 1, color.RGBA{0xff, 0xff, 0xff, 0xff})
+				drawText(screen, "START NEXT WAVE!", x+width/2-45, y+height/2-8, 1, 1, color.RGBA{0xff, 0xff, 0xff, 0xff})
 				// 現在のウェーブとトータルウェーブ数を表示する
-				ebitenutil.DebugPrintAt(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave+1, len(waveList)), x+width/2-52, y+height/2+32)
+				drawText(screen, fmt.Sprintf("CURRENT WAVE: %d/%d", h.game.waveCtrl.currentBigWave+1, len(waveList)), x+width/2-52, y+height/2+32, 1, 1, color.RGBA{0xff, 0xff, 0xff, 0xff})
 			},
 		)
 		h.game.infoPanel.AddButton(nextWaveStartButton)

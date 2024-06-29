@@ -8,7 +8,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	_ "embed"
@@ -272,10 +271,11 @@ func (b *radioTower) OnClick(x, y int) bool {
 	b.game.infoPanel.setIcon(icon)
 	b.game.infoPanel.setUnit(b)
 	b.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
-		ebitenutil.DebugPrintAt(screen, "I am Radio Tower!", x, y)
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20)
+		var scale float64 = 2
 		// 範囲攻撃するしレンジも広いが、近くは攻撃できない
-		ebitenutil.DebugPrintAt(screen, "Attacks in an area, effective at range, but cannot hit nearby enemies.", x, y+40)
+		drawText(screen, "I am Radio Tower!", x, y-10, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		drawText(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		drawText(screen, "Attacks in area, cannot hit near bugs!", x, y+50, scale, scale, color.RGBA{0xff, 0xff, 0xff, 0xff})
 	}
 	return false
 }
