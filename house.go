@@ -148,6 +148,11 @@ func (h *house) OnClick(x, y int) bool {
 		h.game.buildInstruction = nil
 	}
 
+	if h.game.buildCandidate != nil {
+		// 建築予定のものを持っているときには何もしない
+		return false
+	}
+
 	getAudioPlayer().play(soundChoice)
 
 	h.game.clickedObject = "House"
@@ -183,7 +188,16 @@ func (h *house) OnClick(x, y int) bool {
 					b.game.infoPanel.Remove(b)
 				}
 
-				h.game.buildCandidate = newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
+				b := newBarricade(h.game, 0, 0, barricadeOnDestroyFn)
+				h.game.buildCandidate = b
+				h.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
+					x = x - 150
+					y = y + 10
+					ebitenutil.DebugPrintAt(screen, "I am Barricade!", x, y)
+					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", b.Cost()), x, y+20)
+					// 敵の進行を邪魔するという説明を記載する
+					ebitenutil.DebugPrintAt(screen, "Blocks enemy's advance!", x, y+40)
+				}
 				return false
 			},
 			func(screen *ebiten.Image, x, y, width, height int) {
@@ -234,7 +248,16 @@ func (h *house) OnClick(x, y int) bool {
 					b.game.infoPanel.Remove(b)
 				}
 
-				h.game.buildCandidate = newTower(h.game, 0, 0, towerOnDestroyFn)
+				t := newTower(h.game, 0, 0, towerOnDestroyFn)
+				h.game.buildCandidate = t
+				t.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
+					x = x - 150
+					y = y + 10
+					ebitenutil.DebugPrintAt(screen, "I am Beam Tower!", x, y)
+					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", t.Cost()), x, y+20)
+					// 敵を一匹ずつ攻撃するという説明を記載する
+					ebitenutil.DebugPrintAt(screen, "Attack single bug by laser beam!", x, y+40)
+				}
 				return false
 			},
 			func(screen *ebiten.Image, x, y, width, height int) {
@@ -284,7 +307,16 @@ func (h *house) OnClick(x, y int) bool {
 					b.game.infoPanel.Remove(b)
 				}
 
-				h.game.buildCandidate = newRadioTower(h.game, 0, 0, radioTowerOnDestroyFn)
+				rt := newRadioTower(h.game, 0, 0, radioTowerOnDestroyFn)
+				h.game.buildCandidate = rt
+				h.game.infoPanel.drawDescriptionFn = func(screen *ebiten.Image, x, y int) {
+					x = x - 150
+					y = y + 10
+					ebitenutil.DebugPrintAt(screen, "I am Radio Tower!", x, y)
+					ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Cost: $%d", rt.Cost()), x, y+20)
+					// 範囲攻撃するしレンジも広いが、近くは攻撃できない
+					ebitenutil.DebugPrintAt(screen, "Attacks in an area, effective at range, but cannot hit nearby enemies.", x, y+40)
+				}
 				return false
 			},
 			func(screen *ebiten.Image, x, y, width, height int) {
